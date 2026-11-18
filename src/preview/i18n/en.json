@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "label": "English",
+    "htmlLang": "en"
+  },
+  "gallery": {
+    "title": "Resume Gallery",
+    "subtitle": "Browse and open your resumes",
+    "searchPlaceholder": "Search resumes by ID…",
+    "loading": "Loading…",
+    "count": "{n} resumes",
+    "countOne": "{n} resume",
+    "emptyTitle": "No resumes found",
+    "emptyDesc": "Create a resume using the resume_preview tool to see it here",
+    "noResultsTitle": "No matching resumes",
+    "noResultsDesc": "Try a different search term",
+    "deleteTitle": "Delete",
+    "deleteConfirm": "Are you sure you want to delete resume \"{id}\"?",
+    "deleteFailed": "Failed to delete resume: {message}",
+    "loadFailedTitle": "Failed to load resumes",
+    "navGallery": "Gallery",
+    "footerText": "Resume Preview",
+    "pageTitle": "Resume Gallery - Resume Preview"
+  },
+  "preview": {
+    "statusLive": "Live Reload Active",
+    "statusStatic": "Static View",
+    "statusDisconnected": "Disconnected - Reconnecting…",
+    "statusFailed": "Connection failed - Reload page to retry",
+    "lastUpdated": "Last updated: {time}",
+    "btnBack": "Go back",
+    "btnZoomIn": "Zoom in",
+    "btnZoomOut": "Zoom out",
+    "btnReset": "Reset position",
+    "btnExport": "Export resume",
+    "exportPdf": "Download PDF",
+    "exportHtml": "Download HTML",
+    "exportMissingId": "Resume identifier is missing. Try rendering the resume again.",
+    "exportFailed": "Failed to export the resume: {message}"
+  },
+  "resume": {
+    "sectionSummary": "Summary",
+    "sectionExperience": "Experience",
+    "sectionProjects": "Projects",
+    "sectionEducation": "Education",
+    "sectionSkills": "Skills",
+    "sectionExtras": "Extras",
+    "namePlaceholder": "Your Name",
+    "docTitle": "Resume"
+  },
+  "common": {
+    "switchLanguage": "Language",
+    "langZh": "中文",
+    "langEn": "English",
+    "itemSeparator": ", "
+  }
+}

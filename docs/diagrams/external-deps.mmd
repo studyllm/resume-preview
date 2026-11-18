@@ -1,0 +1,53 @@
+flowchart TB
+  subgraph APP["resume-preview 自身"]
+    direction LR
+    CORE["应用代码<br/>src/*.ts"]
+  end
+
+  subgraph CAT1["① 直接依赖 (npm dependencies)"]
+    direction LR
+    SDK["@modelcontextprotocol/sdk ^1.18<br/>MCP 协议 / JSON-RPC / stdio transport"]
+    PUPPETEER["puppeteer ^25.16<br/>驱动无头 Chromium<br/>渲染简历与打印 PDF"]
+    WS["ws ^8.18<br/>WebSocket 服务端"]
+  end
+
+  subgraph CAT2["② 中间件与运行时 (构建/运行环境)"]
+    direction LR
+    NODE["Node.js >= 22.13<br/>内置 http / fs / child_process / os"]
+    CHROME["Chromium 沙箱<br/>puppeteer 的实际渲染引擎"]
+    FS["本地文件系统<br/>~/.config/resume-preview/{resumes,logs}"]
+    BROWSER["用户浏览器<br/>预览页 + 画廊页 + WebSocket 客户端"]
+    CJK["系统 CJK 字体<br/>导出含中日韩字符的简历时的前提<br/>缺失时渲染报错"]
+  end
+
+  subgraph CAT3["③ 外部 API 与外部服务"]
+    direction LR
+    NPMREG["registry.npmjs.org<br/>安装期拉取依赖"]
+    GITHUB["github.com/studyllm/resume-preview<br/>源码仓库 / CI / Dependabot"]
+    GHPAGES["studyllm.github.io<br/>GitHub Pages 文档站"]
+  end
+
+  CORE --> SDK
+  CORE --> PUPPETEER
+  CORE --> WS
+
+  PUPPETEER --> CHROME
+  CORE --> NODE
+  CORE --> FS
+  CORE --> BROWSER
+  CORE --> CJK
+  BROWSER --> WS
+
+  CORE -. "npm install" .-> NPMREG
+  CORE -. "CI / 发布" .-> GITHUB
+  GITHUB -.-> GHPAGES
+
+  classDef self fill:#e6f7f0,stroke:#1f9d63,color:#0b3d28
+  classDef dep fill:#fff4e0,stroke:#d98b1a,color:#4a2d05
+  classDef mw fill:#f3ecff,stroke:#7a4fd1,color:#2b1650
+  classDef ext fill:#ffecec,stroke:#c0392b,color:#4a1210
+
+  class CORE self
+  class SDK,PUPPETEER,WS dep
+  class NODE,CHROME,FS,BROWSER,CJK mw
+  class NPMREG,GITHUB,GHPAGES ext

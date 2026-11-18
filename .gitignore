@@ -1,0 +1,23 @@
+node_modules/
+build/
+dist/
+*.log
+.DS_Store
+
+# Local-only resume data (real name, email, phone — never commit)
+.claude/dev/*.json
+
+# Scratch files
+.claude/dev/tmp-*.txt
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Export artifacts (resume_export can write anywhere, including in-repo)
+*.pdf
+*.tgz
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*

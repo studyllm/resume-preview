@@ -1,0 +1,65 @@
+{
+  "name": "@studyllm/resume-preview",
+  "version": "3.1.0",
+  "description": "MCP server for previewing and exporting resumes in Claude Code",
+  "main": "build/index.js",
+  "type": "module",
+  "bin": {
+    "resume-preview": "build/index.js"
+  },
+  "files": [
+    "build/**/*.js",
+    "build/**/*.html",
+    "build/**/*.css",
+    "build/**/*.json",
+    "build/**/*.svg"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/copy-preview.mjs",
+    "start": "node build/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:e2e": "npm run build && node .claude/dev/e2e-mcp.mjs && node .claude/dev/e2e-web.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "resume",
+    "cv",
+    "claude",
+    "pdf"
+  ],
+  "author": "studyllm",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studyllm/resume-preview.git"
+  },
+  "homepage": "https://github.com/studyllm/resume-preview#readme",
+  "bugs": {
+    "url": "https://github.com/studyllm/resume-preview/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.2",
+    "puppeteer": "^25.16.0",
+    "ws": "^8.18.3"
+  },
+  "overrides": {
+    "puppeteer": "^25.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "@types/ws": "^8.18.1",
+    "prettier": "^3.6.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

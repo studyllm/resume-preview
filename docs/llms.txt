@@ -1,0 +1,67 @@
+# Resume Preview
+
+> resume-preview is an MCP (Model Context Protocol) server that renders a resume in the browser with live reload as Claude revises the content. It exposes two tools — resume_preview and resume_export — renders an A4 page, exports PDF or HTML, and ships as a Claude Code plugin with a built-in resume skill. Free and MIT-licensed.
+
+> **发布状态**：npm 包 `@studyllm/resume-preview` **尚未发布**（`npm view @studyllm/resume-preview` 返回 404），
+> 因此 `npm install -g @studyllm/resume-preview` 与插件的 `npx` 启动方式暂时都不可用。
+> GitHub 仓库 `studyllm/resume-preview` 已创建，请克隆源码后执行
+> `npm install && npm run build`，再按 `.mcp.json` 接入。
+
+Key facts:
+
+- Install as a Claude Code plugin: `/plugin marketplace add studyllm/resume-preview` then `/plugin install resume-preview@resume-preview`
+- Or from npm, once published: `npm install -g @studyllm/resume-preview` then `claude mcp add --scope user resume-preview resume-preview`
+- Works with any MCP client (Cursor, Codex, Windsurf, Cline, Gemini CLI) via the `resume-preview` command
+- Runs locally: renders with puppeteer, serves previews at http://localhost:3737/resume/<slug> (ports 3737–3747), reloads over WebSocket
+- Resumes persist under ~/.config/resume-preview/resumes; `resume-preview --serve` opens a standalone gallery
+- Two independent languages: the page chrome follows `?lang=` > `Accept-Language` > `zh-CN` per request, the resume follows its own stored `locale` — the exported document never depends on the browser
+- Runtime dependencies: @modelcontextprotocol/sdk, puppeteer, ws. Node.js >= 22.13
+
+## Tools
+
+- `resume_preview` — renders the resume as an A4 page and opens a live preview
+  - `resume_id` (string, required) — names the resume; may contain Chinese characters, the storage slug is derived from it
+  - `content` (object or string, required) — the resume; only `basics.name` is required
+  - `template` (string, default `default`) — `default` is the only template implemented today
+  - `theme` (string, default `default`) — `default` is the only theme implemented today
+  - `locale` (string, default `zh-CN`) — language of the resume itself: the section headings and the exported document; one of `zh-CN`, `en`; stored with the resume
+  - Reuse the same `resume_id` to revise: the open tab reloads instead of a new one opening
+- `resume_export` — saves the resume to a path
+  - `save_path` (string, required) — the extension must match the format
+  - `resume_id` (string, required) — must match the `resume_id` used in `resume_preview`
+  - `format` (string, default `pdf`) — `pdf` or `html`
+  - `refresh` (boolean, default `false`) — force a re-render even when a cached artifact exists
+
+## Content model
+
+- Only `basics.name` is required; missing sections are omitted from the page
+- Sections: `basics` {name, title, email, phone, location, links[{label,url}]}, `summary`, `experience` [{company, title, start, end, location, highlights[]}], `projects` [{name, role, period, highlights[]}], `education` [{school, degree, period, highlights[]}], `skills` [{category, items[]}], `extras` [{label, items[]}]
+- `start` / `end` are free-form strings; the page joins them with a short dash
+- Section order is fixed — `en`: Summary → Experience → Projects → Education → Skills → Extras; `zh-CN`: 自我评价 → 工作经历 → 项目经历 → 教育经历 → 专业技能 → 其他. The headings follow the resume's own `locale`, not the browser's.
+- Content is escaped and rendered as plain text — HTML in the content is never interpreted
+- Content is validated structurally only: an object of at most 1 MB, unknown fields ignored
+
+## Runtime facts
+
+- The local server binds to 127.0.0.1 only and has no authentication — never expose it to a LAN or the internet
+- PDF export requires a Chinese font installed on the machine only when the document contains Chinese characters — a zh-CN resume always counts as Chinese, an English-only resume does not; it fails with an explicit error instead of producing tofu boxes
+- Resumes live under ~/.config/resume-preview/resumes/<slug>/, logs under ~/.config/resume-preview/logs
+- The slug is derived from the `resume_id`: an ASCII skeleton plus a 6-character hash suffix, so preview URLs are not guessable
+- Log level is read from `CLAUDE_MERMAID_LOG_LEVEL` (DEBUG/INFO/WARN/ERROR/OFF, default INFO) — the name is a leftover from the project's former name and is kept unchanged
+- HTTP routes: GET / (gallery), GET /api/resumes, DELETE /api/resumes/:id, GET /resume/:slug (live preview), GET /resume/view/:slug, GET /resume/export/:slug?format=pdf|html, GET /i18n/:locale.json, plus /resume.css, /resume.js, /shared.css, /gallery.css, /gallery.js, /i18n.js, /favicon.svg
+
+## Documentation
+
+- [Website (markdown, 中文)](https://studyllm.github.io/resume-preview/index.md): Full product page as clean markdown — features, installation for each client, tools reference, content model, and FAQ
+- [Website (markdown, English)](https://studyllm.github.io/resume-preview/index.en.md): The same product page in English
+- [README (中文)](https://raw.githubusercontent.com/studyllm/resume-preview/main/README.md): Source-of-truth documentation with quick start, configuration, and troubleshooting details
+- [README (English)](https://raw.githubusercontent.com/studyllm/resume-preview/main/README.en.md): The same documentation in English
+
+## Source code
+
+- [GitHub repository](https://github.com/studyllm/resume-preview): TypeScript source, issues, and releases (MIT license)
+- [npm package](https://www.npmjs.com/package/@studyllm/resume-preview): Package `@studyllm/resume-preview` — **not published yet**, see the status note above
+
+## Related
+
+- [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code): The primary client this server is built for

@@ -1,0 +1,106 @@
+flowchart LR
+  subgraph ENTRY["入口层"]
+    direction TB
+    IDX["index.ts<br/>MCP stdio 入口"]
+    SERVE["serve.ts<br/>--serve 独立模式"]
+  end
+
+  subgraph APP["应用层"]
+    direction TB
+    HANDLERS["handlers.ts<br/>MCP 工具实现<br/>简历的预览与导出"]
+    LS["live-server.ts<br/>HTTP + WebSocket 服务"]
+    ROUTES["routes.ts<br/>路由分发"]
+    RSV["resume-service.ts<br/>简历读写业务逻辑"]
+    PREND["page-renderer.ts<br/>HTML 模板渲染"]
+  end
+
+  subgraph CAP["能力层"]
+    direction TB
+    FUTILS["file-utils.ts<br/>路径解析与校验"]
+    RREND["resume-renderer.ts<br/>简历渲染与 PDF 打印"]
+    I18N["i18n.ts<br/>语言解析与取词"]
+    HTMLU["html-utils.ts<br/>HTML 转义"]
+    LOGR["logger.ts<br/>文件日志"]
+  end
+
+  subgraph BASE["基础层"]
+    direction TB
+    CONF["constants.ts<br/>常量与默认值"]
+    TYPES["types.ts<br/>共享类型定义"]
+  end
+
+  IDX --> HANDLERS
+  IDX --> CONF
+  IDX --> LOGR
+
+  SERVE --> LS
+  SERVE --> RSV
+  SERVE --> FUTILS
+  SERVE --> CONF
+
+  HANDLERS --> LS
+  HANDLERS --> FUTILS
+  HANDLERS --> LOGR
+  HANDLERS --> TYPES
+  HANDLERS --> CONF
+
+  LS --> FUTILS
+  LS --> LOGR
+  LS --> ROUTES
+  LS --> TYPES
+  LS --> CONF
+
+  ROUTES --> TYPES
+  ROUTES --> PREND
+  ROUTES --> RSV
+  ROUTES --> CONF
+  ROUTES --> LOGR
+  ROUTES --> I18N
+
+  PREND --> CONF
+  PREND --> TYPES
+  PREND --> LOGR
+  PREND --> I18N
+
+  FUTILS --> CONF
+  FUTILS --> TYPES
+  LOGR --> FUTILS
+  TYPES --> CONF
+
+  HANDLERS --> RREND
+  LS --> RREND
+  LS --> HTMLU
+  LS --> I18N
+  PREND --> HTMLU
+  RREND --> HTMLU
+  RREND --> I18N
+  RSV --> FUTILS
+  RSV --> CONF
+  RSV --> TYPES
+  RSV --> LOGR
+  RREND --> TYPES
+  RREND --> CONF
+  RREND --> LOGR
+
+  I18N --> CONF
+  I18N --> TYPES
+  I18N --> LOGR
+  I18N --> HTMLU
+
+  subgraph LEGEND["图例"]
+    direction TB
+    NORMAL["灰色细线 = 普通依赖<br/>箭头方向 = import 方向"]
+    ACYCLIC["依赖自上而下、无环<br/>handlers.ts → live-server.ts 是单向的"]
+  end
+
+  classDef appNode fill:#fff4e0,stroke:#d98b1a,color:#4a2d05
+  classDef capNode fill:#f3ecff,stroke:#7a4fd1,color:#2b1650
+  classDef baseNode fill:#f4f4f5,stroke:#71717a,color:#27272a
+  classDef entryNode fill:#e6f7f0,stroke:#1f9d63,color:#0b3d28
+
+  class IDX,SERVE entryNode
+  class HANDLERS,LS,ROUTES,RSV,PREND appNode
+  class FUTILS,RREND,I18N,HTMLU,LOGR capNode
+  class CONF,TYPES baseNode
+
+  linkStyle default stroke:#c4c4c4,stroke-width:1px

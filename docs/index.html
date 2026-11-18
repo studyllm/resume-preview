@@ -1,0 +1,2559 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Resume Preview — 给任意 MCP 客户端的实时简历预览</title>
+    <meta
+      name="description"
+      content="一个 MCP server，把简历渲染到浏览器里的 A4 页面，每次内容更新就实时刷新。可导出 PDF 或 HTML。免费且 MIT 许可。"
+    />
+    <link rel="canonical" href="https://studyllm.github.io/resume-preview/" />
+    <link
+      rel="alternate"
+      type="text/markdown"
+      href="https://studyllm.github.io/resume-preview/index.md"
+      title="Markdown version of this page"
+    />
+    <link
+      rel="alternate"
+      type="text/markdown"
+      href="https://studyllm.github.io/resume-preview/index.en.md"
+      title="Markdown version of this page (English)"
+    />
+    <!--
+      AI agents: skip parsing this HTML. A clean markdown version of this page is at
+      https://studyllm.github.io/resume-preview/index.md and a structured link index is at
+      https://studyllm.github.io/resume-preview/llms.txt
+    -->
+
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131311" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Resume Preview" />
+    <meta property="og:title" content="Resume Preview — 给任意 MCP 客户端的实时简历预览" />
+    <meta
+      property="og:description"
+      content="一个 MCP server，把简历渲染到浏览器里的 A4 页面，每次内容更新就实时刷新。可导出 PDF 或 HTML。"
+    />
+    <meta property="og:url" content="https://studyllm.github.io/resume-preview/" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta
+      property="og:image"
+      content="https://raw.githubusercontent.com/studyllm/resume-preview/main/assets/architecture.png"
+    />
+    <meta property="og:image:alt" content="The architecture of the resume-preview MCP server" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Resume Preview — 给任意 MCP 客户端的实时简历预览" />
+    <meta
+      name="twitter:description"
+      content="一个 MCP server，把简历渲染到浏览器里的 A4 页面，每次内容更新就实时刷新。可导出 PDF 或 HTML。"
+    />
+    <meta
+      name="twitter:image"
+      content="https://raw.githubusercontent.com/studyllm/resume-preview/main/assets/architecture.png"
+    />
+
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231b1a17'/><rect x='9.2' y='6.2' width='13.6' height='19.6' rx='2' fill='none' stroke='%23faf7f0' stroke-width='2.1'/><rect x='12.2' y='10.8' width='7.6' height='2.2' rx='1.1' fill='%23ff3670'/><rect x='12.2' y='15.4' width='7.6' height='1.8' rx='0.9' fill='%23faf7f0'/><rect x='12.2' y='19.4' width='5' height='1.8' rx='0.9' fill='%23faf7f0'/></svg>"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Resume Preview",
+        "description": "An MCP server that renders a resume in your browser with live reload as the content changes. Exports A4 PDF and standalone HTML from a structured content model.",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "macOS, Linux, Windows",
+        "softwareVersion": "3.1.0",
+        "inLanguage": ["zh-CN", "en"],
+        "url": "https://studyllm.github.io/resume-preview/",
+        "codeRepository": "https://github.com/studyllm/resume-preview",
+        "downloadUrl": "https://www.npmjs.com/package/@studyllm/resume-preview",
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {
+          "@type": "Person",
+          "name": "Vitalii Elenhaupt",
+          "url": "https://github.com/veelenga"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Which clients are supported?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It is built for Claude Code, where the plugin also installs a resume skill. Because it speaks the Model Context Protocol, it works with any MCP client, including Cursor, Codex, Windsurf, Cline, and Gemini CLI, using the standard command configuration."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which formats can a resume be exported to?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PDF and HTML. The PDF is a real A4 page printed by headless Chromium; the HTML is a standalone document you can open and edit in a browser. The file extension has to match the requested format."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Where are my resumes stored?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Resumes are kept under ~/.config/resume-preview/resumes/<slug>/ so they persist between sessions, and logs live under ~/.config/resume-preview/logs. The resume_export tool writes the artifact to any path you choose, such as ./docs/resume.pdf."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which languages are supported?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Two, and they are independent. The page chrome follows the request: the ?lang=en query parameter wins, then the browser's Accept-Language header, then zh-CN. The resume itself follows the locale parameter you pass to resume_preview, which is stored with the resume and decides the section headings and the exported document. The export never depends on the browser, so the same resume always exports the same way."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What ports does it use?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The local preview server uses ports 3737 to 3747 and automatically picks the first one that is free. It binds to 127.0.0.1 only and has no authentication, so it must never be exposed to a LAN or the internet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I work on several resumes at once?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Give each resume its own resume_id, such as company-a or company-b, and each gets its own live URL that reloads independently. Reuse the same resume_id to revise a resume in the tab you already have open."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does exporting to PDF need anything special?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Only when the document actually contains Chinese — the machine needs a Chinese font installed, otherwise the Chinese characters would come out as empty boxes. The export fails with a clear message instead of quietly writing a broken file. A resume with locale set to zh-CN always counts as Chinese (its section headings are Chinese); a resume written entirely in English exports fine on a machine without a Chinese font."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can the content contain HTML?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, and deliberately so. Every value is escaped and printed as text, so markup shows up literally instead of being interpreted. Write plain text."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is it free?",
+            "inLanguage": "en",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. resume-preview is open source under the MIT license."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "支持哪些客户端？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "它是为 Claude Code 做的，插件还会一并装上简历技能。因为它讲的是 Model Context Protocol，所以任何 MCP 客户端都能用 —— Cursor、Codex、Windsurf、Cline、Gemini CLI 都在内 —— 用标准的命令配置即可。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "简历能导出成哪些格式？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "pdf 和 html。PDF 是无头 Chromium 打印出的真实 A4 页面；HTML 是可以打开编辑的独立文档。文件扩展名必须与请求的格式一致。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "导出 PDF 需要什么额外条件吗？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "只有当文档里出现中文时才需要 —— 机器上装有中文字体，否则中文字符会变成空心方块。导出失败并给出明确报错，而不是悄悄写出一个坏文件。locale 为 zh-CN 的简历一律按「需要中文字体」处理（它的分节标题本身就是中文）；locale 为 en 的纯英文简历在没有中文字体的机器上也能正常导出。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "我的简历存放在哪里？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "简历存放在 ~/.config/resume-preview/resumes/<slug>/ 下，跨会话也不丢；日志在 ~/.config/resume-preview/logs。resume_export 工具把产物写到你指定的任意路径，比如 ./docs/resume.pdf。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "支持哪些语言？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "两种，而且彼此独立。页面框架跟随请求：?lang=en 参数优先，其次是浏览器的 Accept-Language 请求头，最后是 zh-CN。简历本身跟随你传给 resume_preview 的 locale 参数，它与简历一起存储，决定分节标题和导出的文档。导出永远不依赖浏览器，所以同一份简历每次导出都一样。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "用哪些端口？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "本地预览服务使用 3737 到 3747 端口，自动挑第一个空闲的。它只绑定 127.0.0.1，且没有鉴权，绝不能暴露到局域网或公网。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "能同时做多份简历吗？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "可以。给每份一个自己的 resume_id，比如 company-a 或 company-b，每份都有各自独立的实时 URL。修改同一份简历时复用同一个 resume_id，刷新的是你已经开着的那个标签页。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "内容里可以放 HTML 吗？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不可以，而且是刻意的。每个值都转义后按文本打印，标记会原样显示，不会被解释。写纯文本就好。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "免费吗？",
+            "inLanguage": "zh-CN",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "免费。resume-preview 是 MIT 许可证下的开源项目。"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      :root {
+        --bg: #fbfaf7;
+        --bg-raised: #ffffff;
+        --bg-sunken: #f4f1ea;
+        --ink: #1b1a17;
+        --ink-soft: #4a4741;
+        --ink-faint: #736e64;
+        --line: #e7e2d7;
+        --line-strong: #d7d1c3;
+        --accent: #ff3670;
+        --accent-ink: #c11d4e;
+        --term-bg: #1c1b18;
+        --term-ink: #e9e5db;
+        --term-faint: #9a948a;
+        --shadow: 0 1px 2px rgba(27, 26, 23, 0.06), 0 12px 32px rgba(27, 26, 23, 0.07);
+        --radius: 12px;
+        --maxw: 1080px;
+        --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+        --font-mono:
+          ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131311;
+          --bg-raised: #1c1b18;
+          --bg-sunken: #1a1916;
+          --ink: #f2efe8;
+          --ink-soft: #c2bdb1;
+          --ink-faint: #928c80;
+          --line: #2c2a24;
+          --line-strong: #3a382f;
+          --accent: #ff4d80;
+          --accent-ink: #ff7ba1;
+          --term-bg: #0f0f0d;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 34px rgba(0, 0, 0, 0.4);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-sans);
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      a {
+        color: var(--accent-ink);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-serif);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.12;
+        color: var(--ink);
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: var(--font-mono);
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ---------- nav ---------- */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: saturate(1.4) blur(8px);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--ink);
+        font-family: var(--font-mono);
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .brand:hover {
+        text-decoration: none;
+      }
+      .brand svg {
+        width: 26px;
+        height: 26px;
+        display: block;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .nav-links a {
+        color: var(--ink-soft);
+        font-size: 15px;
+      }
+      .nav-links a:hover {
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .nav-sec {
+        display: none;
+      }
+      @media (min-width: 820px) {
+        .nav-sec {
+          display: inline;
+        }
+      }
+
+      /* ---------- buttons ---------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 18px;
+        border-radius: 9px;
+        font-size: 15px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: transform 0.06s ease;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        text-decoration: none;
+        background: color-mix(in srgb, var(--accent) 88%, #000);
+      }
+      .btn-ghost {
+        background: var(--bg-raised);
+        color: var(--ink);
+        border-color: var(--line-strong);
+      }
+      .btn-ghost:hover {
+        text-decoration: none;
+        border-color: var(--ink-faint);
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        padding: 74px 0 40px;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 44px;
+        align-items: center;
+      }
+      @media (min-width: 900px) {
+        .hero-grid {
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: 56px;
+        }
+      }
+      .hero-grid > *,
+      .steps li > *,
+      .feat-grid > * {
+        min-width: 0;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        color: var(--ink-faint);
+        margin: 0 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .eyebrow .dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--line-strong);
+      }
+      h1 {
+        font-size: clamp(34px, 5.2vw, 52px);
+        margin: 0 0 22px;
+      }
+      h1 .em {
+        color: var(--accent-ink);
+        font-style: italic;
+      }
+      .lede {
+        font-size: 19px;
+        color: var(--ink-soft);
+        margin: 0 0 30px;
+        max-width: 34em;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .hero-note {
+        margin: 20px 0 0;
+        font-size: 14px;
+        color: var(--ink-faint);
+      }
+
+      /* ---------- code / terminal ---------- */
+      .term {
+        background: var(--term-bg);
+        border-radius: var(--radius);
+        border: 1px solid var(--line-strong);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .term-bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .term-bar .light {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        display: block;
+      }
+      .light.r {
+        background: #ff5f57;
+      }
+      .light.y {
+        background: #febc2e;
+      }
+      .light.g {
+        background: #28c840;
+      }
+      .term-title {
+        margin-left: 8px;
+        color: var(--term-faint);
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+      }
+      .term-body {
+        padding: 18px 18px 20px;
+        font-family: var(--font-mono);
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: var(--term-ink);
+        overflow-x: auto;
+      }
+      .term-body .prompt {
+        color: var(--accent);
+      }
+      .term-body .user {
+        color: #e9e5db;
+      }
+      .term-body .assistant {
+        color: #cfe8d4;
+      }
+      .term-body .tool {
+        color: #f3c969;
+      }
+      .term-body .muted {
+        color: var(--term-faint);
+      }
+      .term-body .ok {
+        color: #7bd88f;
+      }
+      .term-body p {
+        margin: 0 0 2px;
+      }
+      .term-body .spacer {
+        height: 12px;
+      }
+
+      /* copy-able command block */
+      .cmd {
+        position: relative;
+        background: var(--term-bg);
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
+        margin: 0;
+        overflow: hidden;
+      }
+      .cmd-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 12px 8px 16px;
+        border-bottom: 1px solid var(--line-strong);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .cmd-bar-title {
+        color: var(--ink-faint);
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+      }
+      .cmd-bar .copy {
+        position: static;
+        box-shadow: none;
+      }
+      .cmd-bar + pre {
+        padding-right: 16px;
+      }
+      .cmd-hint {
+        margin: 10px 0 0;
+        color: var(--ink-faint);
+        font-size: 13.5px;
+      }
+      .cmd pre {
+        margin: 0;
+        padding: 15px 52px 15px 16px;
+        overflow-x: auto;
+        color: var(--term-ink);
+        font-size: 13.5px;
+        line-height: 1.65;
+      }
+      .cmd pre .c {
+        color: var(--term-faint);
+      }
+      .cmd .prompt {
+        color: var(--accent);
+        user-select: none;
+      }
+      .copy {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        display: none;
+        background: #33322d;
+        color: #d9d5cb;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: -6px 0 10px -2px var(--term-bg);
+        border-radius: 7px;
+        padding: 5px 9px;
+        font-size: 12px;
+        font-family: var(--font-mono);
+        cursor: pointer;
+      }
+      .js .copy {
+        display: inline-block;
+      }
+      .copy:hover {
+        background: #45443d;
+      }
+      .copy.done {
+        color: #7bd88f;
+        border-color: rgba(123, 216, 143, 0.5);
+      }
+
+      /* ---------- preview card (live resume) ---------- */
+      .preview {
+        background: var(--bg-raised);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .preview-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--bg-sunken);
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        color: var(--ink-faint);
+      }
+      .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #28c840;
+        box-shadow: 0 0 0 3px rgba(40, 200, 64, 0.18);
+        flex: none;
+      }
+      .preview-url {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .preview-tag {
+        margin-left: auto;
+        color: var(--ink-faint);
+      }
+      .preview-canvas {
+        padding: 22px 18px;
+        min-height: 220px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .resume-page {
+        width: 100%;
+        max-width: 340px;
+        background: var(--bg-raised);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 18px 20px 20px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+      }
+      .resume-page .rp-name {
+        font-family: var(--font-serif);
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .resume-page .rp-title {
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        margin-bottom: 6px;
+      }
+      .resume-page .rp-contact {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-faint);
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 4px;
+      }
+      .resume-page .rp-section {
+        font-size: 12px;
+        font-weight: 650;
+        color: var(--ink);
+        margin: 12px 0 3px;
+      }
+      .resume-page .rp-entry {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .resume-page .rp-meta {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        color: var(--ink-faint);
+        margin-bottom: 2px;
+      }
+      .resume-page .rp-line {
+        padding-left: 11px;
+        position: relative;
+      }
+      .resume-page .rp-line::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--line-strong);
+      }
+
+      /* ---------- section scaffolding ---------- */
+      section {
+        padding: 60px 0;
+        border-top: 1px solid var(--line);
+      }
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--accent-ink);
+        margin: 0 0 14px;
+      }
+      h2 {
+        font-size: clamp(26px, 3.4vw, 34px);
+        margin: 0 0 16px;
+      }
+      .section-lede {
+        color: var(--ink-soft);
+        max-width: 40em;
+        margin: 0 0 40px;
+        font-size: 18px;
+      }
+      h3 {
+        font-size: 20px;
+        margin: 0 0 8px;
+      }
+
+      /* demo */
+      .demo figure {
+        margin: 0;
+      }
+      .demo-frame {
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        background: var(--bg-raised);
+      }
+      .demo-frame img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      figcaption {
+        margin-top: 14px;
+        color: var(--ink-faint);
+        font-size: 14.5px;
+      }
+
+      /* steps */
+      .steps {
+        list-style: none;
+        counter-reset: step;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 4px;
+      }
+      .steps li {
+        counter-increment: step;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 20px;
+        padding: 22px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .steps li:last-child {
+        border-bottom: 0;
+      }
+      .steps li::before {
+        content: counter(step, decimal-leading-zero);
+        font-family: var(--font-mono);
+        font-size: 14px;
+        color: var(--accent-ink);
+        padding-top: 3px;
+      }
+      .steps h3 {
+        margin: 0 0 4px;
+      }
+      .steps p {
+        margin: 0;
+        color: var(--ink-soft);
+      }
+      .steps code {
+        background: var(--bg-sunken);
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        padding: 1px 6px;
+        font-size: 0.86em;
+      }
+
+      /* features */
+      .feat-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+      @media (min-width: 720px) {
+        .feat-grid {
+          grid-template-columns: 1fr 1fr;
+          column-gap: 48px;
+        }
+      }
+      .feat {
+        padding: 22px 0;
+        border-top: 1px solid var(--line);
+      }
+      .feat h3 {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        font-family: var(--font-sans);
+        font-size: 17px;
+        font-weight: 650;
+      }
+      .feat h3::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background: var(--accent);
+        flex: none;
+        transform: translateY(-1px);
+      }
+      .feat p {
+        margin: 6px 0 0;
+        color: var(--ink-soft);
+        font-size: 15.5px;
+      }
+
+      /* install tabs (pure CSS) */
+      .tabs input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .tablist {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 24px;
+      }
+      .tablist label {
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink-faint);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+      }
+      .tablist label:hover {
+        color: var(--ink);
+      }
+      #tab-plugin:checked ~ .tablist label[for="tab-plugin"],
+      #tab-npm:checked ~ .tablist label[for="tab-npm"],
+      #tab-other:checked ~ .tablist label[for="tab-other"] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+      }
+      .tabpanel {
+        display: none;
+      }
+      #tab-plugin:checked ~ .tabpanels #panel-plugin,
+      #tab-npm:checked ~ .tabpanels #panel-npm,
+      #tab-other:checked ~ .tabpanels #panel-other {
+        display: block;
+      }
+      .tabpanel p {
+        margin: 0 0 16px;
+        color: var(--ink-soft);
+      }
+      .tabpanel p.after {
+        margin: 16px 0 0;
+        font-size: 15px;
+      }
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--accent-ink);
+        border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+        border-radius: 999px;
+        padding: 2px 9px;
+        margin-left: 8px;
+        vertical-align: 2px;
+      }
+
+      /* tables */
+      .table-scroll {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        margin-bottom: 32px;
+        background: var(--bg-raised);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 560px;
+        font-size: 15px;
+      }
+      caption {
+        text-align: left;
+        padding: 16px 18px 6px;
+        font-family: var(--font-mono);
+        font-size: 15px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+      caption .muted {
+        color: var(--ink-faint);
+        font-weight: 400;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 11px 18px;
+        border-top: 1px solid var(--line);
+        vertical-align: top;
+      }
+      thead th {
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--ink-faint);
+        font-weight: 600;
+      }
+      td code {
+        font-size: 13px;
+        color: var(--ink);
+      }
+      td.param code {
+        color: var(--accent-ink);
+      }
+      .req {
+        color: var(--accent-ink);
+        font-size: 12px;
+        font-family: var(--font-mono);
+      }
+
+      /* faq */
+      .faq details {
+        border-top: 1px solid var(--line);
+        padding: 4px 0;
+      }
+      .faq details:last-of-type {
+        border-bottom: 1px solid var(--line);
+      }
+      .faq summary {
+        cursor: pointer;
+        padding: 18px 0;
+        font-family: var(--font-serif);
+        font-size: 19px;
+        font-weight: 600;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .faq summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq summary::after {
+        content: "+";
+        color: var(--accent-ink);
+        font-family: var(--font-mono);
+        font-weight: 400;
+      }
+      .faq details[open] summary::after {
+        content: "\2212";
+      }
+      .faq p {
+        margin: 0 0 18px;
+        color: var(--ink-soft);
+        max-width: 46em;
+      }
+
+      /* footer */
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 48px 0 60px;
+        color: var(--ink-faint);
+        font-size: 15px;
+      }
+      .foot-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 28px;
+      }
+      .foot-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+      }
+      .foot-links a {
+        color: var(--ink-soft);
+      }
+      footer .brand {
+        margin-bottom: 12px;
+      }
+
+      /*
+       * Bilingual content. The page structure is written once; only the text
+       * is duplicated per language and the active one is kept in the flow.
+       * The selector keys off <html lang>, which the head script sets before
+       * first paint — so there is no flash and no flash-free fallback needed.
+       */
+      html[lang="en"] span[lang="zh-CN"],
+      html[lang="zh-CN"] span[lang="en"] {
+        display: none;
+      }
+
+      /* The switcher only ever offers the language you are not reading. */
+      html[lang="zh-CN"] [data-lang-link="zh-CN"],
+      html[lang="en"] [data-lang-link="en"] {
+        display: none;
+      }
+
+      .lang-switch {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.03em;
+        padding: 3px 10px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+      }
+      .lang-switch:hover {
+        border-color: var(--ink-faint);
+      }
+    </style>
+    <script>
+      // Resolve the page language before the body is parsed, so the reader
+      // never sees the wrong language flash. The order mirrors the product's
+      // own UI locale resolution: ?lang= > browser preference > default.
+      (function () {
+        var LANGS = { zh: "zh-CN", en: "en" };
+        var DEFAULT_LANG = "zh-CN";
+
+        var STRINGS = {
+          "zh-CN": {
+            title: "Resume Preview — 给任意 MCP 客户端的实时简历预览",
+            description:
+              "一个 MCP server，把简历渲染到浏览器里的 A4 页面，每次内容更新就实时刷新。可导出 PDF 或 HTML。免费且 MIT 许可。",
+            aria: {
+              nav: "主导航",
+              home: "Resume Preview 首页",
+              copy: "复制安装命令",
+              copyPlugin: "复制插件安装命令",
+              copyNpm: "复制 npm 安装命令",
+              copyConfig: "复制 MCP 配置",
+              preview: "浏览器里渲染的 A4 简历页实时预览，状态指示灯显示已连接。",
+              tabs: "安装方式",
+              footer: "页脚",
+              term: "Claude Code 会话示例",
+            },
+            copy: { done: "已复制", failed: "复制失败" },
+          },
+          en: {
+            title: "Resume Preview — Live Resume Previews for Any MCP Client",
+            description:
+              "An MCP server that renders a resume in your browser and reloads it live as the content changes. Export PDF or HTML. Free and MIT-licensed.",
+            aria: {
+              nav: "Primary",
+              home: "Resume Preview home",
+              copy: "Copy install commands",
+              copyPlugin: "Copy plugin install commands",
+              copyNpm: "Copy npm install commands",
+              copyConfig: "Copy MCP configuration",
+              preview:
+                "A live preview of an A4 resume page, rendered in the browser with a connected status indicator.",
+              tabs: "Installation methods",
+              footer: "Footer",
+              term: "Example Claude Code session",
+            },
+            copy: { done: "Copied", failed: "Copy failed" },
+          },
+        };
+
+        function setMeta(attr, value, content) {
+          var el = document.querySelector("meta[" + attr + '="' + value + '"]');
+          if (el) el.setAttribute("content", content);
+        }
+
+        function normalize(value) {
+          return (value || "").toLowerCase().split(/[-_]/)[0];
+        }
+
+        function resolve() {
+          var override = normalize(new URLSearchParams(window.location.search).get("lang"));
+          if (LANGS[override]) return LANGS[override];
+
+          var prefs =
+            navigator.languages && navigator.languages.length
+              ? navigator.languages
+              : [navigator.language];
+          for (var i = 0; i < prefs.length; i++) {
+            var key = normalize(prefs[i]);
+            if (LANGS[key]) return LANGS[key];
+          }
+          return DEFAULT_LANG;
+        }
+
+        var lang = resolve();
+        var s = STRINGS[lang];
+
+        document.documentElement.lang = lang;
+        document.title = s.title;
+        setMeta("name", "description", s.description);
+        setMeta("property", "og:title", s.title);
+        setMeta("property", "og:description", s.description);
+        setMeta("property", "og:locale", lang === "zh-CN" ? "zh_CN" : "en_US");
+        setMeta("name", "twitter:title", s.title);
+        setMeta("name", "twitter:description", s.description);
+
+        // The head runs before the body exists, so the aria-labels are applied
+        // by the script at the end of the body. Hand it the strings here.
+        window.RPI18n = { lang: lang, strings: s };
+      })();
+    </script>
+  </head>
+
+  <body>
+    <nav class="nav" aria-label="Primary" data-i18n-aria="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top" aria-label="Resume Preview home" data-i18n-aria="home">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="7" fill="var(--ink)" />
+            <rect
+              x="9.2"
+              y="6.2"
+              width="13.6"
+              height="19.6"
+              rx="2"
+              fill="none"
+              stroke="var(--bg)"
+              stroke-width="2.1"
+            />
+            <rect x="12.2" y="10.8" width="7.6" height="2.2" rx="1.1" fill="var(--accent)" />
+            <rect x="12.2" y="15.4" width="7.6" height="1.8" rx="0.9" fill="var(--bg)" />
+            <rect x="12.2" y="19.4" width="5" height="1.8" rx="0.9" fill="var(--bg)" />
+          </svg>
+          resume-preview
+        </a>
+        <div class="nav-links">
+          <a class="nav-sec" href="#how"
+            ><span lang="zh-CN">工作原理</span><span lang="en">How it works</span></a
+          >
+          <a class="nav-sec" href="#features"
+            ><span lang="zh-CN">功能特性</span><span lang="en">Features</span></a
+          >
+          <a class="nav-sec" href="#install"
+            ><span lang="zh-CN">安装</span><span lang="en">Install</span></a
+          >
+          <a class="nav-sec" href="#tools"
+            ><span lang="zh-CN">工具</span><span lang="en">Tools</span></a
+          >
+          <a class="lang-switch" href="?lang=zh-CN" data-lang-link="zh-CN">中文</a>
+          <a class="lang-switch" href="?lang=en" data-lang-link="en">English</a>
+          <a href="https://github.com/studyllm/resume-preview">GitHub</a>
+          <a href="https://www.npmjs.com/package/@studyllm/resume-preview">npm</a>
+        </div>
+      </div>
+    </nav>
+
+    <main id="main">
+      <span id="top"></span>
+
+      <!-- hero -->
+      <header class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="eyebrow">
+              <span lang="zh-CN"
+                >MCP server <span class="dot"></span> 简历 <span class="dot"></span> 实时刷新</span
+              >
+              <span lang="en"
+                >MCP server <span class="dot"></span> resumes <span class="dot"></span> live
+                reload</span
+              >
+            </p>
+            <h1>
+              <span lang="zh-CN"
+                >让 AI 写简历，看着它在你打磨时<span class="em">不断刷新。</span></span
+              >
+              <span lang="en"
+                >Ask an AI for a resume. Watch it
+                <span class="em">refresh as you refine it.</span></span
+              >
+            </h1>
+            <p class="lede">
+              <span lang="zh-CN"
+                >resume-preview 把简历渲染到你的浏览器里，每次内容更新，都会通过 WebSocket
+                让页面自动重载。一个 A4 页面，你改措辞时原地刷新，改好了再导出成 PDF 或 HTML ——
+                语言跟着目标岗位走。</span
+              >
+              <span lang="en"
+                >resume-preview renders a resume in your browser, and every time the content changes
+                the page reloads over a WebSocket. One A4 page, refreshed in place while you rewrite
+                the wording, exported to PDF or HTML when it is ready — in the language of the job
+                posting.</span
+              >
+            </p>
+            <div
+              class="cmd"
+              data-copy="/plugin marketplace add studyllm/resume-preview&#10;/plugin install resume-preview@resume-preview"
+            >
+              <div class="cmd-bar">
+                <span class="cmd-bar-title"
+                  ><span lang="zh-CN">在 Claude Code 中输入</span>
+                  <span lang="en">Type in Claude Code</span></span
+                >
+                <button
+                  class="copy"
+                  type="button"
+                  aria-label="Copy install commands"
+                  data-i18n-aria="copy"
+                >
+                  <span lang="zh-CN" data-copy-state>复制</span
+                  ><span lang="en" data-copy-state>Copy</span>
+                </button>
+              </div>
+              <pre>
+/plugin marketplace add studyllm/resume-preview
+/plugin install resume-preview@resume-preview</pre>
+            </div>
+            <p class="cmd-hint">
+              <span lang="zh-CN"
+                >用的不是 Claude Code？见下方<a href="#install">安装方式</a
+                >里的其它客户端配置。</span
+              >
+              <span lang="en"
+                >Not using Claude Code? See the other client options under
+                <a href="#install">Install</a>.</span
+              >
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#install"
+                ><span lang="zh-CN">立即安装</span><span lang="en">Install it</span></a
+              >
+              <a class="btn btn-ghost" href="https://github.com/studyllm/resume-preview"
+                ><span lang="zh-CN">在 GitHub 上查看</span><span lang="en">View on GitHub</span></a
+              >
+            </div>
+            <p class="hero-note">
+              <span lang="zh-CN">免费开源 · MIT 许可证 · 兼容任何 MCP 客户端。</span>
+              <span lang="en">Free and open source · MIT license · works with any MCP client.</span>
+            </p>
+          </div>
+
+          <div>
+            <div
+              class="preview"
+              role="img"
+              aria-label="A live preview of an A4 resume page, rendered in the browser with a connected status indicator."
+              data-i18n-aria="preview"
+            >
+              <div class="preview-bar">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span class="preview-url">localhost:3737/resume/r-3f9a2b</span>
+                <span class="preview-tag"
+                  ><span lang="zh-CN">实时 · a4</span><span lang="en">live · a4</span></span
+                >
+              </div>
+              <div class="preview-canvas">
+                <div class="resume-page">
+                  <div class="rp-name">
+                    <span lang="zh-CN">张小明</span><span lang="en">Alex Morgan</span>
+                  </div>
+                  <div class="rp-title">
+                    <span lang="zh-CN">高级后端工程师 · 上海</span
+                    ><span lang="en">Senior Backend Engineer · Shanghai</span>
+                  </div>
+                  <div class="rp-contact">
+                    <span lang="zh-CN">zhang@example.com · 138-0000-0000 · github.com/example</span
+                    ><span lang="en">alex@example.com · +1 555-0100 · github.com/example</span>
+                  </div>
+                  <div class="rp-section">
+                    <span lang="zh-CN">工作经历</span><span lang="en">Experience</span>
+                  </div>
+                  <div class="rp-entry">
+                    <span lang="zh-CN">某某科技有限公司 · 高级后端工程师</span
+                    ><span lang="en">Northwind Systems · Senior Backend Engineer</span>
+                  </div>
+                  <div class="rp-meta">
+                    <span lang="zh-CN">2023.07 - 至今 · 上海</span
+                    ><span lang="en">2023.07 - Present · Shanghai</span>
+                  </div>
+                  <div class="rp-line">
+                    <span lang="zh-CN">主导订单系统重构，接口 P99 延迟从 800ms 降到 180ms</span
+                    ><span lang="en"
+                      >Rebuilt the order pipeline, cutting p99 latency from 800ms to 180ms</span
+                    >
+                  </div>
+                  <div class="rp-line">
+                    <span lang="zh-CN">搭建单元化发布流程，回滚时间从 20 分钟缩短到 2 分钟</span
+                    ><span lang="en"
+                      >Shipped a cell-based release process, cutting rollback time from 20 minutes
+                      to 2</span
+                    >
+                  </div>
+                  <div class="rp-section">
+                    <span lang="zh-CN">项目经历</span><span lang="en">Projects</span>
+                  </div>
+                  <div class="rp-entry">
+                    <span lang="zh-CN">实时数据平台 · 技术负责人</span
+                    ><span lang="en">Realtime Data Platform · Tech Lead</span>
+                  </div>
+                  <div class="rp-meta">
+                    <span lang="zh-CN">2024.01 - 2024.09</span
+                    ><span lang="en">2024.01 - 2024.09</span>
+                  </div>
+                  <div class="rp-line">
+                    <span lang="zh-CN">设计流式 ETL 链路，支撑日均 20 亿条事件</span
+                    ><span lang="en"
+                      >Designed a streaming ETL pipeline handling 2B events per day</span
+                    >
+                  </div>
+                  <div class="rp-section">
+                    <span lang="zh-CN">专业技能</span><span lang="en">Skills</span>
+                  </div>
+                  <div class="rp-line">
+                    <span lang="zh-CN">后端 — Go · Java · PostgreSQL · Kafka</span
+                    ><span lang="en">Backend — Go · Java · PostgreSQL · Kafka</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- workflow -->
+      <section class="demo" aria-labelledby="demo-h">
+        <div class="wrap">
+          <p class="kicker"><span lang="zh-CN">工作流</span><span lang="en">The loop</span></p>
+          <h2 id="demo-h">
+            <span lang="zh-CN">起草、修改、导出 —— 浏览器自己跟得上</span>
+            <span lang="en">Draft, revise, export — the browser keeps up on its own</span>
+          </h2>
+          <p class="section-lede">
+            <span lang="zh-CN"
+              >不用截图，不用复制粘贴，也不用导出再刷新。
+              每改一处内容，页面重新渲染，已打开的标签页随之刷新。</span
+            >
+            <span lang="en"
+              >No screenshots, no copy-paste, no export-and-refresh. Every content change re-renders
+              the page and the open tab reloads.</span
+            >
+          </p>
+          <ol class="steps">
+            <li>
+              <div>
+                <h3><span lang="zh-CN">要一份简历</span><span lang="en">Ask for a resume</span></h3>
+                <p>
+                  <span lang="zh-CN"
+                    >AI 客户端调用 <code>resume_preview</code>，带上内容和
+                    <code>resume_id</code>，A4 页面就在你的浏览器里打开了。</span
+                  >
+                  <span lang="en"
+                    >The AI client calls <code>resume_preview</code> with the content and a
+                    <code>resume_id</code>, and the A4 page opens in your browser.</span
+                  >
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3><span lang="zh-CN">改一改</span><span lang="en">Revise it</span></h3>
+                <p>
+                  <span lang="zh-CN"
+                    >之后每次调用都复用<strong>同一个</strong>
+                    <code>resume_id</code
+                    >，所以你已经开着的那个标签页会原地刷新，而不是再开一个。</span
+                  >
+                  <span lang="en"
+                    >Every later call reuses the <strong>same</strong> <code>resume_id</code>, so
+                    the tab you already have refreshes in place instead of a second one
+                    opening.</span
+                  >
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3><span lang="zh-CN">导出</span><span lang="en">Export it</span></h3>
+                <p>
+                  <span lang="zh-CN"
+                    >一次 <code>resume_export</code> 调用，就把最终的 PDF 或 HTML 写到你指定的路径
+                    —— 内容自上次导出后有变化时会自动重新渲染。</span
+                  >
+                  <span lang="en"
+                    >One <code>resume_export</code> call writes the final PDF or HTML to the path
+                    you name — re-rendered automatically whenever the content changed since the last
+                    export.</span
+                  >
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- how it works -->
+      <section id="how" aria-labelledby="how-h">
+        <div class="wrap">
+          <p class="kicker">
+            <span lang="zh-CN">工作原理</span><span lang="en">How it works</span>
+          </p>
+          <h2 id="how-h">
+            <span lang="zh-CN">一个本地渲染闭环，四个环节</span>
+            <span lang="en">A local render loop, four moving parts</span>
+          </h2>
+          <p class="section-lede">
+            <span lang="zh-CN"
+              >服务很小，行为可预期。下面就是从你提出请求到屏幕出页面之间发生的事。</span
+            >
+            <span lang="en"
+              >The server is small and predictable. Here is exactly what happens between your
+              request and the page on screen.</span
+            >
+          </p>
+          <ol class="steps">
+            <li>
+              <div>
+                <h3>
+                  <span lang="zh-CN">AI 客户端调用工具</span
+                  ><span lang="en">The AI client calls a tool</span>
+                </h3>
+                <p>
+                  <span lang="zh-CN"
+                    >当你要一份简历时，AI 客户端调用
+                    <code>resume_preview</code>，带上内容和标识这次会话的
+                    <code>resume_id</code>。</span
+                  >
+                  <span lang="en"
+                    >When you ask for a resume, the AI client calls <code>resume_preview</code> with
+                    the content and a <code>resume_id</code> that names the session.</span
+                  >
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>
+                  <span lang="zh-CN">渲染出页面</span><span lang="en">It renders the page</span>
+                </h3>
+                <p>
+                  <span lang="zh-CN"
+                    >服务把内容写进工作文件，再填充 HTML
+                    模板，每个值都做转义，所以页面始终是纯文本。</span
+                  >
+                  <span lang="en"
+                    >The server writes the content to a working file and fills the HTML template,
+                    escaping every value so the page stays plain text.</span
+                  >
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>
+                  <span lang="zh-CN">在本地提供这个简历</span>
+                  <span lang="en">It serves the resume locally</span>
+                </h3>
+                <p>
+                  <span lang="zh-CN"
+                    >一个小型本地服务把它托管在
+                    <code>http://localhost:3737/resume/&lt;slug&gt;</code
+                    >，并在第一次时替你打开浏览器。</span
+                  >
+                  <span lang="en"
+                    >A small local server hosts the result at
+                    <code>http://localhost:3737/resume/&lt;slug&gt;</code> and opens it in your
+                    browser the first time.</span
+                  >
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>
+                  <span lang="zh-CN">通过 WebSocket 实时刷新</span>
+                  <span lang="en">It reloads live over WebSocket</span>
+                </h3>
+                <p>
+                  <span lang="zh-CN"
+                    >之后每次用同一个
+                    <code>resume_id</code>
+                    调用，都会重新渲染文件并推送一次刷新。绿点表示已连接，红点表示正在重连。</span
+                  >
+                  <span lang="en"
+                    >Every later call with the same <code>resume_id</code> re-renders the file and
+                    pushes a reload down a WebSocket. A green dot means the tab is connected; red
+                    means it is reconnecting.</span
+                  >
+                </p>
+              </div>
+            </li>
+          </ol>
+
+          <div style="margin-top: 34px">
+            <div class="term" aria-label="Example Claude Code session" data-i18n-aria="term">
+              <div class="term-bar">
+                <span class="light r" aria-hidden="true"></span>
+                <span class="light y" aria-hidden="true"></span>
+                <span class="light g" aria-hidden="true"></span>
+                <span class="term-title">claude — backend resume</span>
+              </div>
+              <div class="term-body">
+                <p>
+                  <span class="prompt">&gt;</span>
+                  <span class="user"
+                    ><span lang="zh-CN">帮我写一份后端工程师的简历并预览</span
+                    ><span lang="en"
+                      >Write a resume for a backend engineer role and preview it</span
+                    ></span
+                  >
+                </p>
+                <div class="spacer"></div>
+                <p>
+                  <span class="assistant">●</span>
+                  <span class="user"
+                    ><span lang="zh-CN">我来渲染并打开实时预览。</span
+                    ><span lang="en">I'll render that and open a live preview.</span></span
+                  >
+                </p>
+                <div class="spacer"></div>
+                <p>
+                  <span class="tool">resume-preview</span> <span class="muted">▸</span>
+                  <span class="tool">resume_preview</span>
+                  <span class="muted">(resume_id: "backend-2026")</span>
+                </p>
+                <p>
+                  <span class="muted">⎿</span>
+                  <span class="ok"
+                    ><span lang="zh-CN">渲染成功</span
+                    ><span lang="en">Rendered successfully</span></span
+                  >
+                  <span class="muted">· opened http://localhost:3737/resume/r-3f9a2b</span>
+                </p>
+                <p>
+                  <span class="muted"
+                    ><span lang="zh-CN">实时刷新已开启 —— 你一更新内容，页面就自动刷新。</span
+                    ><span lang="en"
+                      >Live reload URL is on — the page auto-refreshes when you update it.</span
+                    ></span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- features -->
+      <section id="features" aria-labelledby="feat-h">
+        <div class="wrap">
+          <p class="kicker"><span lang="zh-CN">功能特性</span><span lang="en">Features</span></p>
+          <h2 id="feat-h">
+            <span lang="zh-CN">为反复打磨简历而做，而不是为反复导出而做</span>
+            <span lang="en">Built for iterating on a resume, not re-exporting it</span>
+          </h2>
+          <div class="feat-grid">
+            <div class="feat">
+              <h3><span lang="zh-CN">实时刷新</span><span lang="en">Live reload</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >内容一改，浏览器自动刷新，状态圆点显示 WebSocket 连接情况。</span
+                >
+                <span lang="en"
+                  >The browser refreshes automatically as the content changes, with a status dot
+                  showing the WebSocket connection.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3><span lang="zh-CN">A4 版式</span><span lang="en">A4 layout</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >你在浏览器里审阅的那一页，就是 PDF 打印出来的那一页 ——
+                  不需要再对一遍打印样式。</span
+                >
+                <span lang="en"
+                  >The page you review in the browser is the page the PDF prints — no separate print
+                  stylesheet to reconcile.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3>
+                <span lang="zh-CN">PDF 与 HTML 导出</span><span lang="en">PDF and HTML export</span>
+              </h3>
+              <p>
+                <span lang="zh-CN"
+                  >可直接打印的 PDF，或可以打开编辑的独立 HTML
+                  文档。文件扩展名必须与请求的格式一致。</span
+                >
+                <span lang="en"
+                  >A print-ready PDF, or a standalone HTML document you can open and edit. The file
+                  extension has to match the format you ask for.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3>
+                <span lang="zh-CN">始终是纯文本</span><span lang="en">Plain text, always</span>
+              </h3>
+              <p>
+                <span lang="zh-CN"
+                  >内容里的每个值都转义后按文本打印。HTML 标签和脚本永远不会被解释 —— 这是产品最大的
+                  XSS 面，它会一直关着。</span
+                >
+                <span lang="en"
+                  >Every value in the content is escaped and printed as text. HTML tags and scripts
+                  are never interpreted — the largest XSS surface stays closed.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3><span lang="zh-CN">分节模型</span><span lang="en">Section model</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >只有姓名是必填的。没写的板块会从页面上省略，顺序是固定的：自我评价 → 工作经历 →
+                  项目经历 → 教育经历 → 专业技能 → 其他。</span
+                >
+                <span lang="en"
+                  >Only the name is required. Sections you leave out are omitted from the page, and
+                  the order is fixed: Summary → Experience → Projects → Education → Skills → Extras
+                  — in Chinese when the resume's own language says so.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3>
+                <span lang="zh-CN">两套彼此独立的语言</span>
+                <span lang="en">Two independent languages</span>
+              </h3>
+              <p>
+                <span lang="zh-CN"
+                  >页面框架跟随浏览器语言；简历自身的语言按份设置，决定分节标题和导出的文档 ——
+                  所以导出的 PDF 永远不取决于谁打开它。</span
+                >
+                <span lang="en"
+                  >The page chrome follows the browser's language; the resume's own language is set
+                  per resume and decides the section headings and the exported document — so an
+                  exported PDF never depends on who opened it.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3><span lang="zh-CN">多份简历</span><span lang="en">Multiple resumes</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >每份简历给它自己的 <code>resume_id</code>，同时推进好几份 ——
+                  比如每个目标岗位一份。</span
+                >
+                <span lang="en"
+                  >Give each resume its own <code>resume_id</code> and work on several at once — one
+                  per job you are applying to, for example.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3>
+                <span lang="zh-CN">持久化的工作文件</span>
+                <span lang="en">Persistent working files</span>
+              </h3>
+              <p>
+                <span lang="zh-CN"
+                  >简历存放在 <code>~/.config/resume-preview/resumes</code>，跨会话也不丢。</span
+                >
+                <span lang="en"
+                  >Resumes are kept under <code>~/.config/resume-preview/resumes</code>, so they
+                  survive between sessions.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3><span lang="zh-CN">独立画廊</span><span lang="en">Standalone gallery</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >运行 <code>resume-preview --serve</code> 打开浏览器画廊，列出所有已存简历 ——
+                  不需要 agent。可以按 id
+                  搜索、看到每份简历的最后更新时间，也能删除不再需要的。</span
+                >
+                <span lang="en"
+                  >Run <code>resume-preview --serve</code> to open a browser gallery of every stored
+                  resume — no agent required. Search by id, see when each one was last updated,
+                  delete the ones you no longer need.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3><span lang="zh-CN">审阅工具</span><span lang="en">Review tools</span></h3>
+              <p>
+                <span lang="zh-CN"
+                  >直接在预览页里缩放、平移、导出。状态圆点显示实时连接，旁边还有"最后更新"的时间戳。</span
+                >
+                <span lang="en"
+                  >Zoom, pan and export straight from the preview page. A status dot shows the live
+                  connection, and a stamp tells you when the page last changed.</span
+                >
+              </p>
+            </div>
+            <div class="feat">
+              <h3>
+                <span lang="zh-CN">内置简历技能</span><span lang="en">Built-in resume skill</span>
+              </h3>
+              <p>
+                <span lang="zh-CN"
+                  >Claude Code
+                  插件自带一个技能，装着内容模型和"预览—迭代—导出"的工作流，出来的简历格式总是对的。</span
+                >
+                <span lang="en"
+                  >The Claude Code plugin ships a skill with the content model and the
+                  preview-iterate-export workflow, so resumes come out well-formed.</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- install -->
+      <section id="install" aria-labelledby="install-h">
+        <div class="wrap">
+          <p class="kicker"><span lang="zh-CN">安装</span><span lang="en">Installation</span></p>
+          <h2 id="install-h">
+            <span lang="zh-CN">挑一个客户端，贴两条命令</span>
+            <span lang="en">Pick your client and paste two commands</span>
+          </h2>
+          <p class="section-lede">
+            <span lang="zh-CN"
+              >它是为 Claude Code 做的 —— 插件还会一并装上简历技能。任何兼容 MCP 的客户端用同一条
+              <code>resume-preview</code> 命令就能跑。</span
+            >
+            <span lang="en"
+              >It is built for Claude Code, where the plugin also installs the resume skill. Any
+              MCP-compatible client works with the same <code>resume-preview</code> command.</span
+            >
+          </p>
+
+          <p style="margin: 0 0 20px; font-size: 14px; color: var(--ink-faint)">
+            <span lang="zh-CN"
+              ><strong>发布状态</strong>：npm 包 <code>@studyllm/resume-preview</code>
+              <strong>尚未发布</strong>（<code>npm view @studyllm/resume-preview</code> 返回
+              404），因此 <code>npm install -g @studyllm/resume-preview</code> 与插件的
+              <code>npx</code> 启动方式暂时都不可用。GitHub 仓库
+              <code>studyllm/resume-preview</code> 已创建，请克隆源码后执行
+              <code>npm install &amp;&amp; npm run build</code>，再用
+              <code>.mcp.json</code> 接入。</span
+            >
+            <span lang="en"
+              ><strong>Release status</strong>: The npm package
+              <code>@studyllm/resume-preview</code> is <strong>not published yet</strong> (<code
+                >npm view @studyllm/resume-preview</code
+              >
+              returns 404), so <code>npm install -g @studyllm/resume-preview</code> and the plugin's
+              <code>npx</code> launcher do not work yet. The GitHub repository
+              <code>studyllm/resume-preview</code> does exist — clone the source, run
+              <code>npm install &amp;&amp; npm run build</code>, and wire it up with
+              <code>.mcp.json</code>.</span
+            >
+          </p>
+
+          <div class="tabs">
+            <input type="radio" name="install" id="tab-plugin" checked />
+            <input type="radio" name="install" id="tab-npm" />
+            <input type="radio" name="install" id="tab-other" />
+
+            <div
+              class="tablist"
+              role="tablist"
+              aria-label="Installation methods"
+              data-i18n-aria="tabs"
+            >
+              <label for="tab-plugin"
+                ><span lang="zh-CN">Claude Code 插件</span
+                ><span lang="en">Claude Code plugin</span></label
+              >
+              <label for="tab-npm">npm</label>
+              <label for="tab-other"
+                ><span lang="zh-CN">其他 MCP 客户端</span
+                ><span lang="en">Other MCP clients</span></label
+              >
+            </div>
+
+            <div class="tabpanels">
+              <section class="tabpanel" id="panel-plugin" aria-labelledby="tab-plugin">
+                <p>
+                  <span class="badge"
+                    ><span lang="zh-CN">推荐</span><span lang="en">Recommended</span></span
+                  >
+                  <span lang="zh-CN"
+                    >在 Claude Code 里添加 marketplace 并安装插件，然后重启以激活。</span
+                  >
+                  <span lang="en"
+                    >Add the marketplace and install the plugin from inside Claude Code, then
+                    restart to activate it.</span
+                  >
+                </p>
+                <div
+                  class="cmd"
+                  data-copy="/plugin marketplace add studyllm/resume-preview&#10;/plugin install resume-preview@resume-preview"
+                >
+                  <div class="cmd-bar">
+                    <span class="cmd-bar-title"
+                      ><span lang="zh-CN">在 Claude Code 中输入</span>
+                      <span lang="en">Type in Claude Code</span></span
+                    >
+                    <button
+                      class="copy"
+                      type="button"
+                      aria-label="Copy plugin install commands"
+                      data-i18n-aria="copyPlugin"
+                    >
+                      <span lang="zh-CN" data-copy-state>复制</span
+                      ><span lang="en" data-copy-state>Copy</span>
+                    </button>
+                  </div>
+                  <pre>
+/plugin marketplace add studyllm/resume-preview
+/plugin install resume-preview@resume-preview</pre>
+                </div>
+                <p class="after">
+                  <span lang="zh-CN"
+                    >重启 Claude Code，然后运行 <code>/mcp</code> —— 你应当能在服务列表里看到
+                    <code>resume-preview</code>。</span
+                  >
+                  <span lang="en"
+                    >Restart Claude Code, then run <code>/mcp</code> — you should see
+                    <code>resume-preview</code> in the server list.</span
+                  >
+                </p>
+              </section>
+
+              <section class="tabpanel" id="panel-npm" aria-labelledby="tab-npm">
+                <p>
+                  <span lang="zh-CN">从 npm 全局安装 CLI，并把它注册为用户级 MCP 服务。</span>
+                  <span lang="en"
+                    >Install the CLI globally from npm and register it as a user-scoped MCP
+                    server.</span
+                  >
+                </p>
+                <div
+                  class="cmd"
+                  data-copy="npm install -g @studyllm/resume-preview&#10;claude mcp add --scope user resume-preview resume-preview"
+                >
+                  <div class="cmd-bar">
+                    <span class="cmd-bar-title"
+                      ><span lang="zh-CN">在终端里执行</span>
+                      <span lang="en">Run in a terminal</span></span
+                    >
+                    <button
+                      class="copy"
+                      type="button"
+                      aria-label="Copy npm install commands"
+                      data-i18n-aria="copyNpm"
+                    >
+                      <span lang="zh-CN" data-copy-state>复制</span
+                      ><span lang="en" data-copy-state>Copy</span>
+                    </button>
+                  </div>
+                  <pre><span class="prompt">$</span> npm install -g @studyllm/resume-preview
+<span class="prompt">$</span> claude mcp add --scope user resume-preview resume-preview</pre>
+                </div>
+                <p class="after">
+                  <span lang="zh-CN"
+                    >用 <code>claude mcp list</code> 验证 —— 你应当看到
+                    <code>resume-preview: resume-preview - ✓ Connected</code>。</span
+                  >
+                  <span lang="en"
+                    >Verify with <code>claude mcp list</code> — you should see
+                    <code>resume-preview: resume-preview - ✓ Connected</code>.</span
+                  >
+                </p>
+              </section>
+
+              <section class="tabpanel" id="panel-other" aria-labelledby="tab-other">
+                <p>
+                  <span lang="zh-CN"
+                    >Cursor、Codex、Windsurf、Cline、Gemini CLI，或任何其他 MCP
+                    客户端：先安装这个包，再把下面这段加进客户端的 MCP 配置。</span
+                  >
+                  <span lang="en"
+                    >For Cursor, Codex, Windsurf, Cline, Gemini CLI, or any other MCP client,
+                    install the package and add this to the client's MCP configuration.</span
+                  >
+                </p>
+                <div
+                  class="cmd"
+                  data-copy='{&#10;  "mcpServers": {&#10;    "resume-preview": {&#10;      "command": "resume-preview"&#10;    }&#10;  }&#10;}'
+                >
+                  <div class="cmd-bar">
+                    <span class="cmd-bar-title"
+                      ><span lang="zh-CN">客户端的 MCP 配置</span>
+                      <span lang="en">Your client's MCP configuration</span></span
+                    >
+                    <button
+                      class="copy"
+                      type="button"
+                      aria-label="Copy MCP configuration"
+                      data-i18n-aria="copyConfig"
+                    >
+                      <span lang="zh-CN" data-copy-state>复制</span
+                      ><span lang="en" data-copy-state>Copy</span>
+                    </button>
+                  </div>
+                  <pre>{
+  <span class="c">"mcpServers"</span>: {
+    <span class="c">"resume-preview"</span>: {
+      <span class="c">"command"</span>: <span class="c">"resume-preview"</span>
+    }
+  }
+}</pre>
+                </div>
+                <p class="after">
+                  <span lang="zh-CN"
+                    >有些客户端要的是绝对路径 —— 用
+                    <code>which resume-preview</code> 查到路径后填进去即可。</span
+                  >
+                  <span lang="en"
+                    >Some clients want an absolute path — find it with
+                    <code>which resume-preview</code> and use that as the command.</span
+                  >
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- tools -->
+      <section id="tools" aria-labelledby="tools-h">
+        <div class="wrap">
+          <p class="kicker">
+            <span lang="zh-CN">工具参考</span><span lang="en">Tools reference</span>
+          </p>
+          <h2 id="tools-h">
+            <span lang="zh-CN">两个工具，就这么点事</span>
+            <span lang="en">Two tools, no ceremony</span>
+          </h2>
+          <p class="section-lede">
+            <span lang="zh-CN"
+              >服务恰好暴露两个工具。AI 客户端会替你调用，但完整参数面还是摆在这儿。</span
+            >
+            <span lang="en"
+              >The server exposes exactly two tools. Your AI client calls them for you, but here is
+              the full surface.</span
+            >
+          </p>
+
+          <div class="table-scroll">
+            <table>
+              <caption>
+                <code>resume_preview</code>
+                <span class="muted"
+                  >— <span lang="zh-CN">渲染简历并打开实时预览</span
+                  ><span lang="en">render the resume and open a live preview</span></span
+                >
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <span lang="zh-CN">参数</span><span lang="en">Parameter</span>
+                  </th>
+                  <th scope="col"><span lang="zh-CN">类型</span><span lang="en">Type</span></th>
+                  <th scope="col">
+                    <span lang="zh-CN">默认值</span><span lang="en">Default</span>
+                  </th>
+                  <th scope="col">
+                    <span lang="zh-CN">说明</span><span lang="en">Description</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="param">
+                    <code>resume_id</code>
+                    <span class="req"
+                      ><span lang="zh-CN">必填</span><span lang="en">required</span></span
+                    >
+                  </td>
+                  <td>string</td>
+                  <td>—</td>
+                  <td>
+                    <span lang="zh-CN">给这份简历起名。可以包含中文；落盘的 slug 由它推导。</span>
+                    <span lang="en"
+                      >Names the resume. May contain Chinese characters; the storage slug is derived
+                      from it.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param">
+                    <code>content</code>
+                    <span class="req"
+                      ><span lang="zh-CN">必填</span><span lang="en">required</span></span
+                    >
+                  </td>
+                  <td>
+                    <span lang="zh-CN">对象或字符串</span><span lang="en">object or string</span>
+                  </td>
+                  <td>—</td>
+                  <td>
+                    <span lang="zh-CN"
+                      >简历内容，可以是对象，也可以是装着同样对象的 JSON 字符串。只有
+                      <code>basics.name</code> 是必填的。</span
+                    >
+                    <span lang="en"
+                      >The resume content, as an object or as a JSON string holding the same object.
+                      Only <code>basics.name</code> is required.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>template</code></td>
+                  <td>string</td>
+                  <td><code>default</code></td>
+                  <td>
+                    <span lang="zh-CN">版式模板。目前只实现了 <code>default</code>。</span>
+                    <span lang="en"
+                      >Layout template. <code>default</code> is the only one implemented
+                      today.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>theme</code></td>
+                  <td>string</td>
+                  <td><code>default</code></td>
+                  <td>
+                    <span lang="zh-CN">配色与字体主题。目前只实现了 <code>default</code>。</span>
+                    <span lang="en"
+                      >Color and font theme. <code>default</code> is the only one implemented
+                      today.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>locale</code></td>
+                  <td>string</td>
+                  <td><code>zh-CN</code></td>
+                  <td>
+                    <span lang="zh-CN"
+                      >简历自身的语言 —— 分节标题和导出的文档。可选
+                      <code>zh-CN</code
+                      >、<code>en</code>。与浏览器语言无关，并随简历一起存储。</span
+                    >
+                    <span lang="en"
+                      >Language of the resume itself — the section headings and the exported
+                      document. One of <code>zh-CN</code>, <code>en</code>. Independent of the
+                      browser's language, and stored with the resume.</span
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <caption>
+                <code>resume_export</code>
+                <span class="muted"
+                  >— <span lang="zh-CN">把简历保存到某个路径</span
+                  ><span lang="en">save the resume to a path</span></span
+                >
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <span lang="zh-CN">参数</span><span lang="en">Parameter</span>
+                  </th>
+                  <th scope="col"><span lang="zh-CN">类型</span><span lang="en">Type</span></th>
+                  <th scope="col">
+                    <span lang="zh-CN">默认值</span><span lang="en">Default</span>
+                  </th>
+                  <th scope="col">
+                    <span lang="zh-CN">说明</span><span lang="en">Description</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="param">
+                    <code>save_path</code>
+                    <span class="req"
+                      ><span lang="zh-CN">必填</span><span lang="en">required</span></span
+                    >
+                  </td>
+                  <td>string</td>
+                  <td>—</td>
+                  <td>
+                    <span lang="zh-CN"
+                      >目标路径，例如 <code>./docs/resume.pdf</code>。扩展名必须与格式一致。</span
+                    >
+                    <span lang="en"
+                      >Destination path, e.g. <code>./docs/resume.pdf</code>. The extension must
+                      match the format.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param">
+                    <code>resume_id</code>
+                    <span class="req"
+                      ><span lang="zh-CN">必填</span><span lang="en">required</span></span
+                    >
+                  </td>
+                  <td>string</td>
+                  <td>—</td>
+                  <td>
+                    <span lang="zh-CN"
+                      >必须与 <code>resume_preview</code> 里用的 <code>resume_id</code> 一致。</span
+                    >
+                    <span lang="en"
+                      >Must match the <code>resume_id</code> used in
+                      <code>resume_preview</code>.</span
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>format</code></td>
+                  <td>string</td>
+                  <td><code>pdf</code></td>
+                  <td>
+                    <span lang="zh-CN">可选 <code>pdf</code>、<code>html</code>。</span>
+                    <span lang="en">One of <code>pdf</code>, <code>html</code>.</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>refresh</code></td>
+                  <td>boolean</td>
+                  <td><code>false</code></td>
+                  <td>
+                    <span lang="zh-CN"
+                      >即使已有缓存产物也重新渲染。通常没必要：内容有变化时导出本就会重新渲染。</span
+                    >
+                    <span lang="en"
+                      >Re-render even when a cached artifact exists. Normally unnecessary — the
+                      export already re-renders whenever the content changed.</span
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <caption>
+                <span lang="zh-CN">内容模型</span
+                ><span lang="en">Content model</span>
+                <span class="muted"
+                  >— <span lang="zh-CN">只有 <code>basics.name</code> 是必填的</span
+                  ><span lang="en">only <code>basics.name</code> is required</span></span
+                >
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col"><span lang="zh-CN">板块</span><span lang="en">Section</span></th>
+                  <th scope="col"><span lang="zh-CN">结构</span><span lang="en">Shape</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="param"><code>basics</code></td>
+                  <td>
+                    <code>{ name, title, email, phone, location, links: [{ label, url }] }</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>summary</code></td>
+                  <td>
+                    <code>string</code> — <span lang="zh-CN">一段简短的自我评价</span
+                    ><span lang="en">a short self-summary</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>experience</code></td>
+                  <td>
+                    <code>[{ company, title, start, end, location, highlights: [] }]</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="param"><code>projects</code></td>
+                  <td><code>[{ name, role, period, highlights: [] }]</code></td>
+                </tr>
+                <tr>
+                  <td class="param"><code>education</code></td>
+                  <td><code>[{ school, degree, period, highlights: [] }]</code></td>
+                </tr>
+                <tr>
+                  <td class="param"><code>skills</code></td>
+                  <td><code>[{ category, items: [] }]</code></td>
+                </tr>
+                <tr>
+                  <td class="param"><code>extras</code></td>
+                  <td><code>[{ label, items: [] }]</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- faq -->
+      <section id="faq" class="faq" aria-labelledby="faq-h">
+        <div class="wrap">
+          <p class="kicker"><span lang="zh-CN">常见问题</span><span lang="en">FAQ</span></p>
+          <h2 id="faq-h">
+            <span lang="zh-CN">值得回答的几个问题</span>
+            <span lang="en">Questions worth answering</span>
+          </h2>
+          <div style="margin-top: 28px">
+            <details>
+              <summary>
+                <span lang="zh-CN">支持哪些客户端？</span
+                ><span lang="en">Which clients are supported?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >它是为 Claude Code 做的，插件还会一并装上简历技能。因为它讲的是 Model Context
+                  Protocol，所以任何 MCP 客户端都能用 —— Cursor、Codex、Windsurf、Cline、Gemini CLI
+                  都在内 —— 用标准的命令配置即可。</span
+                >
+                <span lang="en"
+                  >It is built for Claude Code, where the plugin also installs a resume skill.
+                  Because it speaks the Model Context Protocol, it works with any MCP client —
+                  Cursor, Codex, Windsurf, Cline, and Gemini CLI included — using the standard
+                  command configuration.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">简历能导出成哪些格式？</span
+                ><span lang="en">Which formats can a resume be exported to?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  ><code>pdf</code> 和 <code>html</code>。PDF 是无头 Chromium 打印出的真实 A4
+                  页面；HTML 是可以打开编辑的独立文档。文件扩展名必须与请求的格式一致。</span
+                >
+                <span lang="en"
+                  ><code>pdf</code> and <code>html</code>. The PDF is a real A4 page printed by
+                  headless Chromium; the HTML is a standalone document you can open and edit in a
+                  browser. The file extension has to match the requested format.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">导出 PDF 需要什么额外条件吗？</span
+                ><span lang="en">Does exporting to PDF need anything special?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >只有当<strong>文档里出现中文</strong>时才需要 ——
+                  机器上装有中文字体，否则中文字符会变成空心方块。导出失败并给出明确报错，而不是悄悄写出一个坏文件。
+                  <code>locale</code> 为
+                  <code>zh-CN</code> 的简历一律按「需要中文字体」处理（它的分节标题本身就是中文）；
+                  <code>locale</code> 为
+                  <code>en</code> 的纯英文简历在没有中文字体的机器上也能正常导出。</span
+                >
+                <span lang="en"
+                  >Only when the <strong>document actually contains Chinese</strong> — the machine
+                  needs a Chinese font installed, otherwise the Chinese characters would come out as
+                  empty boxes. The export fails with a clear message instead of quietly writing a
+                  broken file. A resume with <code>locale</code> set to <code>zh-CN</code> always
+                  counts as Chinese (its section headings are Chinese); a resume written entirely in
+                  English exports fine on a machine without a Chinese font.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">我的简历存放在哪里？</span
+                ><span lang="en">Where are my resumes stored?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >简历存放在
+                  <code>~/.config/resume-preview/resumes/&lt;slug&gt;/</code>
+                  下，跨会话也不丢；日志在 <code>~/.config/resume-preview/logs</code>。
+                  <code>resume_export</code> 工具把产物写到你指定的任意路径，比如
+                  <code>./docs/resume.pdf</code>。</span
+                >
+                <span lang="en"
+                  >Resumes are kept under
+                  <code>~/.config/resume-preview/resumes/&lt;slug&gt;/</code> so they persist
+                  between sessions, and logs live under <code>~/.config/resume-preview/logs</code>.
+                  The <code>resume_export</code> tool writes the artifact to any path you choose,
+                  such as <code>./docs/resume.pdf</code>.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">支持哪些语言？</span
+                ><span lang="en">Which languages are supported?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >两种，而且彼此独立。页面框架跟随请求 ——
+                  <code>?lang=en</code> 优先，其次是浏览器的 <code>Accept-Language</code>，最后是
+                  <code>zh-CN</code>。简历本身跟随你传给 <code>resume_preview</code> 的
+                  <code>locale</code
+                  >，它与简历一起存储，决定分节标题和导出的文档。导出永远不依赖浏览器，所以同一份简历每次导出都一样。</span
+                >
+                <span lang="en"
+                  >Two, and they are independent of each other. The page chrome follows the request
+                  — <code>?lang=en</code> wins, then the browser's <code>Accept-Language</code>,
+                  then <code>zh-CN</code>. The resume itself follows the <code>locale</code> you
+                  pass to <code>resume_preview</code>, which is stored with the resume and decides
+                  the section headings and the exported document. The export never depends on the
+                  browser, so the same resume always exports the same way.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">用哪些端口？</span><span lang="en">What ports does it use?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >本地预览服务使用 <code>3737</code>–<code>3747</code>
+                  端口，自动挑第一个空闲的。它只绑定 <code>127.0.0.1</code>，且没有鉴权 ——
+                  简历含个人数据，绝不要暴露到局域网。</span
+                >
+                <span lang="en"
+                  >The local preview server uses ports <code>3737</code>–<code>3747</code> and
+                  automatically picks the first one that is free. It binds to
+                  <code>127.0.0.1</code> only and has no authentication — a resume holds personal
+                  data, so never expose it to your LAN.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">能同时做多份简历吗？</span
+                ><span lang="en">Can I work on several resumes at once?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >可以。给每份一个自己的 <code>resume_id</code>，比如 <code>company-a</code> 或
+                  <code>company-b</code>，每份都有各自独立的实时 URL。修改同一份简历时复用同一个
+                  <code>resume_id</code>，刷新的是你已经开着的那个标签页。</span
+                >
+                <span lang="en"
+                  >Yes. Give each one its own <code>resume_id</code>, such as
+                  <code>company-a</code> or <code>company-b</code>, and each gets its own live URL
+                  that reloads independently. Reuse the same <code>resume_id</code> to revise a
+                  resume in the tab you already have open.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">内容里可以放 HTML 吗？</span
+                ><span lang="en">Can the content contain HTML?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN"
+                  >不可以，而且是刻意的。每个值都转义后按文本打印，标记会原样显示，不会被解释。写纯文本就好。</span
+                >
+                <span lang="en"
+                  >No, and deliberately so. Every value is escaped and printed as text, so markup
+                  shows up literally instead of being interpreted. Write plain text.</span
+                >
+              </p>
+            </details>
+            <details>
+              <summary>
+                <span lang="zh-CN">免费吗？</span><span lang="en">Is it free?</span>
+              </summary>
+              <p>
+                <span lang="zh-CN">免费。resume-preview 是 MIT 许可证下的开源项目。</span>
+                <span lang="en">Yes. resume-preview is open source under the MIT license.</span>
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="foot-grid">
+          <div>
+            <a class="brand" href="#top" aria-label="Resume Preview home" data-i18n-aria="home">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <rect width="32" height="32" rx="7" fill="var(--ink)" />
+                <rect
+                  x="9.2"
+                  y="6.2"
+                  width="13.6"
+                  height="19.6"
+                  rx="2"
+                  fill="none"
+                  stroke="var(--bg)"
+                  stroke-width="2.1"
+                />
+                <rect x="12.2" y="10.8" width="7.6" height="2.2" rx="1.1" fill="var(--accent)" />
+                <rect x="12.2" y="15.4" width="7.6" height="1.8" rx="0.9" fill="var(--bg)" />
+                <rect x="12.2" y="19.4" width="5" height="1.8" rx="0.9" fill="var(--bg)" />
+              </svg>
+              resume-preview
+            </a>
+            <div>
+              <span lang="zh-CN"
+                >MIT 许可证 · 基于
+                <a href="https://github.com/veelenga/claude-mermaid">veelenga/claude-mermaid</a>
+                改造</span
+              >
+              <span lang="en"
+                >MIT licensed · Fork of
+                <a href="https://github.com/veelenga/claude-mermaid"
+                  >veelenga/claude-mermaid</a
+                ></span
+              >
+              <br />© 2026 studyllm
+            </div>
+          </div>
+          <nav class="foot-links" aria-label="Footer" data-i18n-aria="footer">
+            <a href="https://github.com/studyllm/resume-preview">GitHub</a>
+            <a href="https://www.npmjs.com/package/@studyllm/resume-preview">npm</a>
+            <a href="https://docs.claude.com/claude-code"
+              ><span lang="zh-CN">Claude Code 文档</span><span lang="en">Claude Code docs</span></a
+            >
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.documentElement.classList.add("js");
+
+      var i18n = window.RPI18n || { lang: "zh-CN", strings: {} };
+
+      // Apply the aria-labels of the active language. The head script resolved
+      // the language before the body existed; the elements live in the body.
+      var ariaTargets = document.querySelectorAll("[data-i18n-aria]");
+      for (var i = 0; i < ariaTargets.length; i++) {
+        var key = ariaTargets[i].getAttribute("data-i18n-aria");
+        var label = i18n.strings.aria && i18n.strings.aria[key];
+        if (label) ariaTargets[i].setAttribute("aria-label", label);
+      }
+
+      // Click-to-copy for command blocks. The button holds one span per
+      // language, so only the visible one is swapped — replacing textContent
+      // would drop the other language for good.
+      var copyStrings = i18n.strings.copy || {
+        done: "Copied",
+        failed: "Copy failed",
+      };
+
+      document.querySelectorAll(".cmd").forEach(function (block) {
+        var button = block.querySelector(".copy");
+        if (!button) return;
+        button.addEventListener("click", async function () {
+          var text = (block.getAttribute("data-copy") || "").replace(/\r/g, "");
+          var target =
+            button.querySelector('[data-copy-state][lang="' + i18n.lang + '"]') ||
+            button.querySelector("[data-copy-state]");
+          var original = target ? target.textContent : button.textContent;
+
+          try {
+            await navigator.clipboard.writeText(text);
+            if (target) target.textContent = copyStrings.done;
+            else button.textContent = copyStrings.done;
+            button.classList.add("done");
+            setTimeout(function () {
+              if (target) target.textContent = original;
+              else button.textContent = original;
+              button.classList.remove("done");
+            }, 1600);
+          } catch (err) {
+            if (target) target.textContent = copyStrings.failed;
+            else button.textContent = copyStrings.failed;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+flowchart TB
+  subgraph ACTORS["参与者"]
+    direction LR
+    CLIENT["Claude Code / MCP 客户端"]
+    BROWSER["浏览器标签页"]
+  end
+
+  subgraph L0["L0 接入层 · 协议适配"]
+    direction LR
+    IDX["index.ts<br/>MCP stdio 服务入口<br/>注册工具并分发调用"]
+    SERVE["serve.ts<br/>--serve 独立模式<br/>注册存量简历并打开画廊"]
+    LS["live-server.ts<br/>HTTP + WebSocket 服务<br/>端口探测与实时推送"]
+  end
+
+  subgraph L1["L1 应用层 · 用例编排"]
+    direction LR
+    HANDLERS["handlers.ts<br/>MCP 工具实现<br/>简历的预览与导出"]
+    ROUTES["routes.ts<br/>URL 匹配<br/>与 HTTP 处理器分发"]
+    RSVC["resume-service.ts<br/>简历列表与删除<br/>的业务逻辑"]
+    PREND["page-renderer.ts<br/>模板加载<br/>与 HTML 变量替换"]
+  end
+
+  subgraph L2["L2 能力层 · 领域支撑"]
+    direction LR
+    FUTILS["file-utils.ts<br/>目录解析、入参校验<br/>与文件读写"]
+    RREND["resume-renderer.ts<br/>内容转 HTML<br/>与 Chromium 打印 PDF"]
+    I18N["i18n.ts<br/>语言解析与取词<br/>界面语言 / 简历语言"]
+    HTMLU["html-utils.ts<br/>HTML 转义"]
+    LOGR["logger.ts<br/>分级日志<br/>写入 mcp.log / web.log"]
+    CONF["constants.ts + types.ts<br/>路由 / 格式 / 默认值<br/>与共享类型"]
+  end
+
+  subgraph L3["L3 外部依赖 · 进程与网络"]
+    direction LR
+    MCPSDK["@modelcontextprotocol/sdk<br/>MCP 协议与 stdio 传输"]
+    PUPPET["puppeteer<br/>无头 Chromium 渲染简历与打印 PDF"]
+    WSLIB["ws<br/>WebSocket 服务端"]
+  end
+
+  subgraph L4["L4 资源层 · 静态资源与本地存储"]
+    direction LR
+    PREVIEW["src/preview/*<br/>预览页与画廊页的模板、脚本与样式<br/>以及语言字典 i18n/*.json"]
+    RSTORE[("~/.config/resume-preview/resumes<br/>按 slug 存放<br/>resume.json / options.json / resume.html")]
+    LOGS[("~/.config/resume-preview/logs<br/>mcp.log 与 web.log")]
+  end
+
+  CLIENT --> IDX
+  CLIENT --> SERVE
+  BROWSER <--> LS
+
+  IDX --> HANDLERS
+  IDX -. "传入 --serve" .-> SERVE
+  SERVE --> LS
+  LS --> ROUTES
+  HANDLERS --> LS
+
+  HANDLERS --> FUTILS
+  HANDLERS --> RREND
+  HANDLERS --> LOGR
+  HANDLERS --> CONF
+  ROUTES --> RSVC
+  ROUTES --> PREND
+  ROUTES --> FUTILS
+  ROUTES --> CONF
+  ROUTES --> I18N
+  RSVC --> FUTILS
+  PREND --> I18N
+  RREND --> I18N
+
+  IDX --> MCPSDK
+  RREND --> PUPPET
+  LS --> WSLIB
+
+  PREND --> PREVIEW
+  LS --> PREVIEW
+  FUTILS --> RSTORE
+  LOGR --> LOGS
+
+  classDef actor fill:#eef4ff,stroke:#3b6fd4,color:#12264f
+  classDef l0 fill:#e6f7f0,stroke:#1f9d63,color:#0b3d28
+  classDef l1 fill:#fff4e0,stroke:#d98b1a,color:#4a2d05
+  classDef l2 fill:#f3ecff,stroke:#7a4fd1,color:#2b1650
+  classDef l3 fill:#ffecec,stroke:#c0392b,color:#4a1210
+  classDef l4 fill:#f4f4f5,stroke:#71717a,color:#27272a
+
+  class CLIENT,BROWSER actor
+  class IDX,SERVE,LS l0
+  class HANDLERS,ROUTES,RSVC,PREND l1
+  class FUTILS,RREND,I18N,HTMLU,LOGR,CONF l2
+  class MCPSDK,PUPPET,WSLIB l3
+  class PREVIEW,RSTORE,LOGS l4

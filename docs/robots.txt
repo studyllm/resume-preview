@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+
+Sitemap: https://studyllm.github.io/resume-preview/sitemap.xml
+
+# AI agents: a structured index is available at
+# https://studyllm.github.io/resume-preview/llms.txt
+# and a markdown version of the site at
+# https://studyllm.github.io/resume-preview/index.md
+# (English: https://studyllm.github.io/resume-preview/index.en.md)

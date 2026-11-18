@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "label": "中文",
+    "htmlLang": "zh-CN"
+  },
+  "gallery": {
+    "title": "简历画廊",
+    "subtitle": "浏览并打开你的简历",
+    "searchPlaceholder": "按 ID 搜索简历…",
+    "loading": "加载中…",
+    "count": "{n} 份简历",
+    "countOne": "{n} 份简历",
+    "emptyTitle": "还没有简历",
+    "emptyDesc": "用 resume_preview 工具创建一份简历后就会出现在这里",
+    "noResultsTitle": "没有匹配的简历",
+    "noResultsDesc": "换个搜索词试试",
+    "deleteTitle": "删除",
+    "deleteConfirm": "确定要删除简历「{id}」吗？",
+    "deleteFailed": "删除失败：{message}",
+    "loadFailedTitle": "简历列表加载失败",
+    "navGallery": "画廊",
+    "footerText": "简历预览",
+    "pageTitle": "简历画廊 - 简历预览"
+  },
+  "preview": {
+    "statusLive": "实时刷新已开启",
+    "statusStatic": "静态视图",
+    "statusDisconnected": "连接已断开，正在重连…",
+    "statusFailed": "连接失败，刷新页面重试",
+    "lastUpdated": "最后更新：{time}",
+    "btnBack": "返回",
+    "btnZoomIn": "放大",
+    "btnZoomOut": "缩小",
+    "btnReset": "复位",
+    "btnExport": "导出简历",
+    "exportPdf": "下载 PDF",
+    "exportHtml": "下载 HTML",
+    "exportMissingId": "缺少简历标识，请重新渲染简历。",
+    "exportFailed": "导出失败：{message}"
+  },
+  "resume": {
+    "sectionSummary": "自我评价",
+    "sectionExperience": "工作经历",
+    "sectionProjects": "项目经历",
+    "sectionEducation": "教育经历",
+    "sectionSkills": "专业技能",
+    "sectionExtras": "其他",
+    "namePlaceholder": "你的名字",
+    "docTitle": "简历"
+  },
+  "common": {
+    "switchLanguage": "语言",
+    "langZh": "中文",
+    "langEn": "English",
+    "itemSeparator": "、"
+  }
+}

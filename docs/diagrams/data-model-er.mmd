@@ -1,0 +1,49 @@
+erDiagram
+    RESUME {
+        string resume_id PK "业务主键, 可含中文, 非空且 200 字符以内"
+        string slug UK "存储主键, 目录名, /^[a-zA-Z0-9_-]+$/"
+        string template "default"
+        string theme "default"
+        string locale "zh-CN, 简历本身的语言"
+        datetime modified_at "取自渲染产物的 mtime"
+        int size_bytes "渲染产物字节数"
+    }
+
+    RESUME_CONTENT {
+        string file_name "resume.json"
+        int version "内容模型版本, 当前 1"
+        object content "结构化简历内容, 事实来源"
+    }
+
+    RESUME_OPTIONS {
+        string file_name "options.json"
+        string template "default"
+        string theme "default"
+        string locale "zh-CN, 简历本身的语言"
+    }
+
+    RESUME_ARTIFACT {
+        string file_name "resume.html | resume.export.html | resume.pdf"
+        string kind "html | exportHtml | pdf"
+        datetime modified_at "文件 mtime"
+        int size_bytes "文件字节数"
+    }
+
+    LIVE_SESSION {
+        string session_key PK "内存态, 非持久化, 带命名空间前缀"
+        string file_path "被监听的文件路径"
+        int watcher_count "fs.FSWatcher"
+        int client_count "已连接的 WebSocket 数"
+    }
+
+    MCP_TOOL_CALL {
+        string tool_name "resume_preview | resume_export"
+        string resume_id "关联的 RESUME, 落盘用 slug"
+        string save_path "resume_export 落盘目标"
+    }
+
+    RESUME ||--|| RESUME_CONTENT : "1:1 内容"
+    RESUME ||--|| RESUME_OPTIONS : "1:1 渲染选项"
+    RESUME ||--o{ RESUME_ARTIFACT : "1:N 渲染产物"
+    RESUME ||--o| LIVE_SESSION : "1:0..1 实时会话"
+    MCP_TOOL_CALL }o--|| RESUME : "按 resume_id 引用"

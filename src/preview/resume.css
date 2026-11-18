@@ -1,0 +1,214 @@
+/* ===== Resume preview & export styles =====
+ * This file is self-contained on purpose: the standalone HTML export inlines
+ * it, so it must carry every rule the document needs. The preview page also
+ * loads shared.css for the toolbar shell.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --resume-font:
+    "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+    "WenQuanYi Micro Hei", "SimSun", "Heiti SC", sans-serif;
+  --resume-text: #1a1a1a;
+  --resume-muted: #5a5a5a;
+  --resume-accent: #2f6fb0;
+  --resume-rule: #d5d5d5;
+}
+
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #efefef;
+  color: var(--resume-text);
+  font-family: var(--resume-font);
+}
+
+body.resume-export {
+  background: #ffffff;
+}
+
+/* ===== Preview viewport ===== */
+
+.resume-viewport {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+.resume-sheet {
+  padding: 40px;
+  min-width: 100%;
+  transform-origin: 0 0;
+}
+
+/* ===== The page itself ===== */
+
+.resume-page {
+  box-sizing: content-box;
+  width: 180mm;
+  margin: 0 auto;
+  padding: 15mm;
+  background: #ffffff;
+  color: var(--resume-text);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+  font-size: 10.5pt;
+  line-height: 1.6;
+}
+
+body.resume-export .resume-page {
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
+.resume-header {
+  margin-bottom: 8mm;
+  padding-bottom: 4mm;
+  border-bottom: 2px solid var(--resume-rule);
+}
+
+.resume-name {
+  margin: 0;
+  font-size: 22pt;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.resume-title {
+  margin: 2mm 0 0;
+  font-size: 12pt;
+  color: var(--resume-accent);
+}
+
+.resume-contact {
+  margin-top: 3mm;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2mm 6mm;
+  font-size: 9.5pt;
+  color: var(--resume-muted);
+}
+
+.resume-section {
+  margin-top: 7mm;
+}
+
+.resume-section-title {
+  margin: 0 0 3mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 1px solid var(--resume-rule);
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--resume-text);
+}
+
+.resume-text {
+  margin: 0;
+  font-size: 10pt;
+}
+
+.resume-entry {
+  margin-bottom: 4mm;
+}
+
+.resume-entry:last-child {
+  margin-bottom: 0;
+}
+
+.resume-entry-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2mm;
+  margin-bottom: 1.5mm;
+}
+
+.resume-entry-title {
+  font-size: 10.5pt;
+  font-weight: 600;
+}
+
+.resume-entry-org {
+  font-size: 10pt;
+  color: var(--resume-text);
+}
+
+.resume-entry-period {
+  font-size: 9pt;
+  color: var(--resume-muted);
+  margin-left: auto;
+}
+
+.resume-list {
+  margin: 1mm 0 0;
+  padding-left: 5mm;
+  font-size: 10pt;
+}
+
+.resume-list li {
+  margin-bottom: 1mm;
+}
+
+.resume-skill-group {
+  display: flex;
+  gap: 3mm;
+  margin-bottom: 2mm;
+  font-size: 10pt;
+}
+
+.resume-skill-category {
+  flex: 0 0 auto;
+  min-width: 18mm;
+  font-weight: 600;
+}
+
+.resume-skill-items {
+  color: var(--resume-text);
+}
+
+/* ===== Printing ===== */
+
+@media print {
+  /* The toolbar and the viewport chrome are screen-only */
+  .status-bar {
+    display: none;
+  }
+
+  .resume-viewport {
+    display: block;
+    overflow: visible;
+  }
+
+  .resume-sheet {
+    padding: 0;
+    min-width: 0;
+    transform: none !important;
+  }
+
+  .resume-page {
+    box-shadow: none;
+  }
+
+  body {
+    background: #ffffff;
+  }
+}
+
+/* ===== Small screens ===== */
+
+@media (max-width: 640px) {
+  .resume-sheet {
+    padding: 16px;
+  }
+}

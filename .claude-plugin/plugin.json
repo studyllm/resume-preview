@@ -1,0 +1,17 @@
+{
+  "name": "resume-preview",
+  "description": "MCP server for previewing and exporting resumes in Claude Code",
+  "version": "3.1.0",
+  "author": {
+    "name": "studyllm",
+    "url": "https://github.com/studyllm/resume-preview"
+  },
+  "repository": "https://github.com/studyllm/resume-preview.git",
+  "homepage": "https://github.com/studyllm/resume-preview#readme",
+  "mcpServers": {
+    "resume-preview": {
+      "command": "npx",
+      "args": ["-y", "@studyllm/resume-preview"]
+    }
+  }
+}

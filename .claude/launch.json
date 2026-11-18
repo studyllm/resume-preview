@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "resume-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [".claude/dev/render-sample-resume.mjs"],
+      "port": 3738
+    },
+    {
+      "name": "resume-live",
+      "url": "http://localhost:3737/resume/frontend-engineer-resume",
+      "port": 3737
+    }
+  ]
+}

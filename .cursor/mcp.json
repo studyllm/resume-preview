@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "resume-preview": {
+      "command": "node",
+      "args": ["build/index.js"]
+    }
+  }
+}

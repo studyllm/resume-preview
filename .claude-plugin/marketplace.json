@@ -1,0 +1,14 @@
+{
+  "name": "resume-preview",
+  "owner": {
+    "name": "studyllm",
+    "url": "https://github.com/studyllm"
+  },
+  "plugins": [
+    {
+      "name": "resume-preview",
+      "source": "./",
+      "description": "MCP server for previewing and exporting resumes in Claude Code"
+    }
+  ]
+}

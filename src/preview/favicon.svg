@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3670"/>
+      <stop offset="100%" stop-color="#ff7c9c"/>
+    </linearGradient>
+  </defs>
+  <!-- The mark is an A4 page: outline, a name line, and two body lines. -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
+  <rect
+    x="18.4"
+    y="12.4"
+    width="27.2"
+    height="39.2"
+    rx="4"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="4.2"
+  />
+  <rect x="24.4" y="21.6" width="15.2" height="4.4" rx="2.2" fill="#ffffff"/>
+  <rect x="24.4" y="30.8" width="15.2" height="3.6" rx="1.8" fill="#ffffff" opacity="0.85"/>
+  <rect x="24.4" y="38.8" width="10" height="3.6" rx="1.8" fill="#ffffff" opacity="0.85"/>
+</svg>

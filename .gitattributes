@@ -1,0 +1,16 @@
+# 统一用 LF 存储与检出。
+#
+# 此前仓库里的 blob 本身带 CRLF，而 Windows 上 core.autocrlf=true 的 checkout
+# 会再叠一层 CR，工作区变成 \r\r\n。git 原样入库后，Linux 上的 CI 用
+# `prettier --check .`（.prettierrc 要求 endOfLine: lf）会全量失败。
+# 显式声明 eol=lf 后，存储、检出、CI 三边一致。
+* text=auto eol=lf
+
+# 二进制资源不做行尾转换
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.ico -text
+*.woff -text
+*.woff2 -text
