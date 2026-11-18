@@ -37,10 +37,10 @@ A local render loop with four moving parts:
 
 ## Installation
 
-> **Release status**: The npm package `@studyllm/resume-preview` is not published yet (`npm view @studyllm/resume-preview`
-> returns 404), so `npm install -g @studyllm/resume-preview` and the plugin's `npx` launcher do not work yet.
-> The GitHub repository `studyllm/resume-preview` does exist — clone the source, run
-> `npm install && npm run build`, and wire it up with `.mcp.json`.
+> **Release status**: The npm package `@studyllm/resume-preview` is published.
+> Install it globally with `npm install -g @studyllm/resume-preview`; the plugin's `npx`
+> launcher is `npx -y @studyllm/resume-preview`. You can also clone the repository
+> `studyllm/resume-preview`, run `npm install && npm run build`, and wire it up with `.mcp.json`.
 
 ### Claude Code plugin (recommended)
 

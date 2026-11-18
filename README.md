@@ -33,10 +33,10 @@ MIT 许可证，兼容任何 MCP 客户端。
 
 ## 🚀 快速开始
 
-> **发布状态**：npm 包 `@studyllm/resume-preview` **尚未发布**（`npm view @studyllm/resume-preview` 返回 404），
-> 因此 `npm install -g @studyllm/resume-preview` 与插件的 `npx` 启动方式暂时都不可用。GitHub 仓库
-> `studyllm/resume-preview` 已创建，请克隆源码后执行 `npm install && npm run build`，
-> 再按下面的 `.mcp.json` 接入 MCP 客户端。
+> **发布状态**：npm 包 `@studyllm/resume-preview` **已发布**。
+> 全局安装：`npm install -g @studyllm/resume-preview`；插件的 `npx` 启动方式为
+> `npx -y @studyllm/resume-preview`。也可克隆源码仓库 `studyllm/resume-preview` 后执行
+> `npm install && npm run build`，再按下面的 `.mcp.json` 接入 MCP 客户端。
 
 **插件安装（推荐）**
 

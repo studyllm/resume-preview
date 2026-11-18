@@ -33,11 +33,11 @@ The module and interface inventory lives in [`docs/api-list.md`](docs/api-list.m
 
 ## 🚀 Quick Start
 
-> **Release status**: the npm package `@studyllm/resume-preview` is **not published yet**
-> (`npm view @studyllm/resume-preview` returns 404), so neither `npm install -g @studyllm/resume-preview` nor the
-> plugin's `npx` launcher works at the moment. The GitHub repository
-> `studyllm/resume-preview` does exist — clone it, run `npm install && npm run build`, and wire it
-> up with the `.mcp.json` below.
+> **Release status**: the npm package `@studyllm/resume-preview` is **published**.
+> Install it globally with `npm install -g @studyllm/resume-preview`; the plugin's `npx`
+> launcher is `npx -y @studyllm/resume-preview`. You can also clone the repository
+> `studyllm/resume-preview`, run `npm install && npm run build`, and wire it up with
+> the `.mcp.json` below.
 
 **Plugin install (recommended)**
 

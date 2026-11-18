@@ -37,10 +37,10 @@ resume-preview 是一个 MCP server，把简历渲染到你的浏览器里，每
 
 ## 安装
 
-> **发布状态**：npm 包 `@studyllm/resume-preview` **尚未发布**（`npm view @studyllm/resume-preview` 返回 404），
-> 因此 `npm install -g @studyllm/resume-preview` 与插件的 `npx` 启动方式暂时都不可用。GitHub 仓库
-> `studyllm/resume-preview` 已创建，请克隆源码后执行 `npm install && npm run build`，
-> 再用 `.mcp.json` 接入。
+> **发布状态**：npm 包 `@studyllm/resume-preview` **已发布**。
+> 全局安装：`npm install -g @studyllm/resume-preview`；插件的 `npx` 启动方式为
+> `npx -y @studyllm/resume-preview`。也可克隆源码仓库 `studyllm/resume-preview` 后执行
+> `npm install && npm run build`，再用 `.mcp.json` 接入。
 
 ### Claude Code 插件（推荐）
 
