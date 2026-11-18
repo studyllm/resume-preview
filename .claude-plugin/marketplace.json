@@ -1,5 +1,6 @@
 {
   "name": "resume-preview",
+  "description": "MCP server for previewing and exporting resumes in Claude Code",
   "owner": {
     "name": "studyllm",
     "url": "https://github.com/studyllm"
