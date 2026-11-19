@@ -1,7 +1,7 @@
 {
   "name": "resume-preview",
   "description": "MCP server for previewing and exporting resumes in Claude Code",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "author": {
     "name": "studyllm",
     "url": "https://github.com/studyllm/resume-preview"

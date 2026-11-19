@@ -1,6 +1,6 @@
 {
   "name": "@studyllm/resume-preview",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "MCP server for previewing and exporting resumes in Claude Code",
   "main": "build/index.js",
   "type": "module",
