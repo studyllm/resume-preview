@@ -73,7 +73,7 @@ describe("i18n", () => {
     it("should reload the dictionaries after the cache is cleared", async () => {
       clearDictionaryCache();
       const dictionary = await getDictionary("zh-CN");
-      expect(t(dictionary, "gallery.title")).toBe("简历画廊");
+      expect(t(dictionary, "gallery.title")).toBe("简历库");
     });
   });
 
@@ -166,7 +166,7 @@ describe("i18n", () => {
       expect(response.headers.get("content-type")).toBe("application/json");
 
       const body = await response.json();
-      expect(body.gallery.title).toBe("简历画廊");
+      expect(body.gallery.title).toBe("简历库");
     });
 
     it("should reject an unsupported locale", async () => {
@@ -212,8 +212,8 @@ describe("i18n", () => {
       expect(response.headers.get("content-language")).toBe("en");
 
       const body = await response.text();
-      expect(body).toContain("Resume Gallery");
-      expect(body).not.toContain("简历画廊");
+      expect(body).toContain("Resume Library");
+      expect(body).not.toContain("简历库");
     });
 
     it("should render the gallery in the language of the header", async () => {
@@ -224,7 +224,7 @@ describe("i18n", () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get("content-language")).toBe("en");
-      expect(await response.text()).toContain("Resume Gallery");
+      expect(await response.text()).toContain("Resume Library");
     });
 
     it("should render the gallery in Chinese by default", async () => {
@@ -233,7 +233,7 @@ describe("i18n", () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get("content-language")).toBe(DEFAULT_UI_LOCALE);
-      expect(await response.text()).toContain("简历画廊");
+      expect(await response.text()).toContain("简历库");
     });
 
     it("should offer a language switcher", async () => {

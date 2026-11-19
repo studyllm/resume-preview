@@ -10,7 +10,7 @@ resume-preview 对外暴露两类接口：
 | 类型                      | 协议                | 面向                                       | 绑定地址              |
 | ------------------------- | ------------------- | ------------------------------------------ | --------------------- |
 | **MCP 工具接口**          | JSON-RPC over stdio | AI 客户端（Claude Code / Codex / Cursor…） | 进程 stdin/stdout     |
-| **HTTP + WebSocket 接口** | HTTP/1.1            | 本地浏览器（预览页 / 画廊页）              | `127.0.0.1:3737-3747` |
+| **HTTP + WebSocket 接口** | HTTP/1.1            | 本地浏览器（预览页 / 简历库页）            | `127.0.0.1:3737-3747` |
 
 ### 路径速查
 
@@ -49,7 +49,7 @@ resume-preview 对外暴露两类接口：
   - [1.1 `resume_preview`](#11-resume_preview)
   - [1.2 `resume_export`](#12-resume_export)
 - [二、HTTP 接口（对外）](#二http-接口对外)
-  - [2.1 画廊与静态资源](#21-画廊与静态资源)
+  - [2.1 简历库与静态资源](#21-简历库与静态资源)
   - [2.2 简历 REST API](#22-简历-rest-api)
   - [2.3 预览页与导出](#23-预览页与导出)
 - [三、WebSocket 接口（对外）](#三websocket-接口对外)
@@ -192,6 +192,11 @@ MCP 只暴露 **2 个**工具：
 | `pdf`    | `resume.pdf`         | Chromium 打印 A4 PDF                 |
 | `html`   | `resume.export.html` | 独立 HTML（含 `<style>`，决策 D15′） |
 
+**独立 HTML 的版式**：`<body class="resume-export">` 下，A4 纸张（`210mm` 宽、`15mm` 内边距）
+水平居中放在灰色底衬上并带投影（`src/preview/resume.css`）。
+`@media print` 内回退为 `180mm` 内容宽、无内边距、无阴影 —— **PDF 产物与浏览器打印结果不受影响**，
+页边距一律由 `@page { margin: 15mm }` 提供。
+
 > ⚠️ `resume.html` 是**预览页内嵌内容**，不是导出产物，两者不可混用。
 >
 > ⚠️ **两条导出路径行为不同**：MCP 工具会缓存产物（按上面的规则失效），
@@ -245,27 +250,27 @@ matchRoute(url)              → 新路由表（routes.ts）
 
 ---
 
-### 2.1 画廊与静态资源
+### 2.1 简历库与静态资源
 
-| 方法 | 路径                 | 处理函数               | 返回        | 响应头                                                     |
-| ---- | -------------------- | ---------------------- | ----------- | ---------------------------------------------------------- |
-| GET  | `/`                  | `handleGallery`        | 画廊页 HTML | `Content-Security-Policy`, `Content-Language`, `text/html` |
-| GET  | `/shared.css`        | `handleSharedCss`      | 共享样式    | `text/css`, `Cache-Control: no-store`                      |
-| GET  | `/gallery.css`       | `handleGalleryCss`     | 画廊样式    | `text/css`, `Cache-Control: no-store`                      |
-| GET  | `/gallery.js`        | `handleGalleryJs`      | 画廊脚本    | `application/javascript`, `Cache-Control: no-store`        |
-| GET  | `/i18n.js`           | `handleI18nScript`     | 取词模块    | `application/javascript`, `Cache-Control: no-store`        |
-| GET  | `/i18n/:locale.json` | `handleI18nDictionary` | 字典 JSON   | `application/json`, `Cache-Control: no-store`              |
+| 方法 | 路径                 | 处理函数               | 返回          | 响应头                                                     |
+| ---- | -------------------- | ---------------------- | ------------- | ---------------------------------------------------------- |
+| GET  | `/`                  | `handleGallery`        | 简历库页 HTML | `Content-Security-Policy`, `Content-Language`, `text/html` |
+| GET  | `/shared.css`        | `handleSharedCss`      | 共享样式      | `text/css`, `Cache-Control: no-store`                      |
+| GET  | `/gallery.css`       | `handleGalleryCss`     | 简历库样式    | `text/css`, `Cache-Control: no-store`                      |
+| GET  | `/gallery.js`        | `handleGalleryJs`      | 简历库脚本    | `application/javascript`, `Cache-Control: no-store`        |
+| GET  | `/i18n.js`           | `handleI18nScript`     | 取词模块      | `application/javascript`, `Cache-Control: no-store`        |
+| GET  | `/i18n/:locale.json` | `handleI18nDictionary` | 字典 JSON     | `application/json`, `Cache-Control: no-store`              |
 
-**画廊页 HTML**：由 `renderPage()`（`src/page-renderer.ts`）把 `src/preview/gallery.html` 与变量
+**简历库页 HTML**：由 `renderPage()`（`src/page-renderer.ts`）把 `src/preview/gallery.html` 与变量
 `{{PAGE_TITLE}}` `{{NAV}}` `{{FOOTER}}` `{{PORT}}` `{{LANG}}` `{{LANG_SWITCH}}` 替换后输出，
 其中的 `{{i18n:gallery.title}}` 一类占位符按当前 locale 取词。
-画廊页自身不带导航与页脚（`includeNav: false, includeFooter: false`）。
+简历库页自身不带导航与页脚（`includeNav: false, includeFooter: false`）。
 
 **界面语言（locale）解析**：`?lang=` > `Accept-Language` > 默认 `zh-CN`。
 `?lang=` 命中白名单才生效，不命中则忽略并继续下探，不返回错误。
 `/i18n/:locale.json` 的 locale 必须在白名单内，否则 404（取值绝不拼进文件路径）。
 
-**画廊前端行为**（`src/preview/gallery.js`）：
+**简历库前端行为**（`src/preview/gallery.js`）：
 
 - 页面加载时 `GET /api/resumes` 拉取简历列表；
 - 搜索框对 `id` 做大小写不敏感的包含匹配（300ms 防抖，纯前端过滤，不发请求）；
@@ -444,7 +449,7 @@ matchRoute(url)              → 新路由表（routes.ts）
 | 函数                                                       | 签名                                       | 说明                       |
 | ---------------------------------------------------------- | ------------------------------------------ | -------------------------- |
 | `matchRoute`                                               | `(url: string) => Route \| null`           | 按 `ROUTE_CONFIG` 匹配路由 |
-| `handleGallery`                                            | `(context: RouteContext) => Promise<void>` | 画廊页                     |
+| `handleGallery`                                            | `(context: RouteContext) => Promise<void>` | 简历库页                   |
 | `handleApiResumes`                                         | `(context: RouteContext) => Promise<void>` | 简历列表 API               |
 | `handleApiResumeDelete`                                    | `(context: RouteContext) => Promise<void>` | 简历删除 API               |
 | `handleSharedCss` / `handleGalleryCss` / `handleGalleryJs` | `(context) => Promise<void>`               | 静态资源                   |
@@ -528,9 +533,9 @@ matchRoute(url)              → 新路由表（routes.ts）
 
 ### `src/serve.ts`
 
-| 函数             | 签名                  | 说明                                                 |
-| ---------------- | --------------------- | ---------------------------------------------------- |
-| `startServeMode` | `() => Promise<void>` | `--serve` 模式入口：注册存量简历、启动服务、打开画廊 |
+| 函数             | 签名                  | 说明                                                   |
+| ---------------- | --------------------- | ------------------------------------------------------ |
+| `startServeMode` | `() => Promise<void>` | `--serve` 模式入口：注册存量简历、启动服务、打开简历库 |
 
 > `--serve` 模式会扫描 `resumes/` 并把已有 `resume.html` 的简历注册为实时会话，
 > 因此重启后历史简历的预览页依然能自动刷新。
@@ -573,12 +578,12 @@ matchRoute(url)              → 新路由表（routes.ts）
 
 ### 响应头约定
 
-| 头                                     | 值                                                                                                                                         | 适用范围                                       |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| `Content-Security-Policy`              | `default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws://localhost:*` | 所有 HTML 响应                                 |
-| `Content-Language`                     | 当前语言（`zh-CN` \| `en`）                                                                                                                | 画廊页、预览页（界面语言）；导出端点为简历语言 |
-| `Cache-Control: no-store`              | —                                                                                                                                          | 静态资源与 API                                 |
-| `Cache-Control: public, max-age=86400` | —                                                                                                                                          | `/favicon.svg`                                 |
+| 头                                     | 值                                                                                                                                         | 适用范围                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `Content-Security-Policy`              | `default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws://localhost:*` | 所有 HTML 响应                                   |
+| `Content-Language`                     | 当前语言（`zh-CN` \| `en`）                                                                                                                | 简历库页、预览页（界面语言）；导出端点为简历语言 |
+| `Cache-Control: no-store`              | —                                                                                                                                          | 静态资源与 API                                   |
+| `Cache-Control: public, max-age=86400` | —                                                                                                                                          | `/favicon.svg`                                   |
 
 > `script-src 'self'` 不含 `unsafe-inline`，因此简历预览页的脚本**必须**是独立同源文件
 > （`/resume.js`、`/i18n.js`），不能内联进 HTML。翻译字典因此走同源 JSON 接口

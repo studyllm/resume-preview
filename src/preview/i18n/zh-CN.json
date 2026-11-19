@@ -4,7 +4,7 @@
     "htmlLang": "zh-CN"
   },
   "gallery": {
-    "title": "简历画廊",
+    "title": "简历库",
     "subtitle": "浏览并打开你的简历",
     "searchPlaceholder": "按 ID 搜索简历…",
     "loading": "加载中…",
@@ -18,9 +18,9 @@
     "deleteConfirm": "确定要删除简历「{id}」吗？",
     "deleteFailed": "删除失败：{message}",
     "loadFailedTitle": "简历列表加载失败",
-    "navGallery": "画廊",
+    "navGallery": "简历库",
     "footerText": "简历预览",
-    "pageTitle": "简历画廊 - 简历预览"
+    "pageTitle": "简历库 - 简历预览"
   },
   "preview": {
     "statusLive": "实时刷新已开启",

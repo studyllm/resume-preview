@@ -55,7 +55,7 @@ allowed-tools: Read, Grep
 - `src/file-utils.ts` → 校验规则与路径布局
 - `src/types.ts` → 数据模型
 - `src/resume-service.ts` → 业务查询与删除语义
-- `src/preview/` → 前端行为（WebSocket、导出、画廊页）
+- `src/preview/` → 前端行为（WebSocket、导出、简历库页）
 - `package.json` → 依赖变化（影响 external-deps 图）
 
 若不确定，就按全量检查（把所有检查项跑一遍）。

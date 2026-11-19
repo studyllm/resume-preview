@@ -38,10 +38,10 @@ MCP 调用 resume_preview
 
 **两条运行模式**（`src/index.ts` 决定，**互斥**）：
 
-| 模式     | 触发      | 启动什么                                       |
-| -------- | --------- | ---------------------------------------------- |
-| 默认     | 无参数    | 仅 MCP stdio server                            |
-| 独立服务 | `--serve` | 仅 HTTP/WS 服务 + 浏览器画廊（**不启动 MCP**） |
+| 模式     | 触发      | 启动什么                                         |
+| -------- | --------- | ------------------------------------------------ |
+| 默认     | 无参数    | 仅 MCP stdio server                              |
+| 独立服务 | `--serve` | 仅 HTTP/WS 服务 + 浏览器简历库（**不启动 MCP**） |
 
 ## 3. 关键模块
 
@@ -54,12 +54,12 @@ MCP 调用 resume_preview
 | `src/resume-service.ts`  | 简历的列表/删除                                   | 与 `resume-renderer.ts` 平级，不混放                 |
 | `src/resume-renderer.ts` | 内容 → HTML / 独立 HTML / PDF（A4）               | 走 puppeteer；仅当导出文档含 CJK 字符时检测 CJK 字体 |
 | `src/file-utils.ts`      | 路径解析、全部入参校验、文件读写                  | **安全边界都在这里**                                 |
-| `src/page-renderer.ts`   | 模板变量替换（画廊页在用）                        | `escapeHtml` 的实现在 `html-utils.ts`，别再复制一份  |
+| `src/page-renderer.ts`   | 模板变量替换（简历库页在用）                      | `escapeHtml` 的实现在 `html-utils.ts`，别再复制一份  |
 | `src/i18n.ts`            | 语言解析与取词（界面语言 / 简历语言）             | 字典在 `src/preview/i18n/*.json`，服务端与浏览器共用 |
 | `src/constants.ts`       | 全部常量（路由/格式/默认值/CSP/正则）             | 改这里前先看 `docs/api-list.md` 的已知问题一节       |
 | `src/types.ts`           | 共享类型                                          | 新增类型必须真的被引用                               |
 | `src/preview/`           | `resume-template.html` `resume.css` `resume.js`   | `resume.js` 必须独立同源文件（CSP 限制）             |
-| `src/preview/`           | `gallery.html` `gallery.css` `gallery.js`         | 画廊页只列简历，接口是 `/api/resumes`                |
+| `src/preview/`           | `gallery.html` `gallery.css` `gallery.js`         | 简历库页只列简历，接口是 `/api/resumes`              |
 | `src/preview/`           | `i18n.js` `i18n/*.json`                           | 客户端取词模块与语言字典（服务端同源共用）           |
 
 **依赖方向**：`handlers.ts → live-server.ts`（单向）。早期 `live-server.ts` 反向 import 了
@@ -104,7 +104,7 @@ MCP 调用 resume_preview
   `zh-CN` 简历**一律**需要中文字体（分节标题本身是中文）；`en` 简历只在正文含
   汉字/假名/谚文/CJK 标点/全角字符时才需要 —— 纯英文简历在没装中文字体的机器上照常导出。
 - **国际化（i18n）**：语言分**两轴**，互不干扰 ——
-  - **界面语言**：画廊页、工具栏、状态、对话框。按 `?lang=` > `Accept-Language` > `zh-CN` 解析，
+  - **界面语言**：简历库页、工具栏、状态、对话框。按 `?lang=` > `Accept-Language` > `zh-CN` 解析，
     只影响这一次请求，**不落盘**。
   - **简历语言**：分节标题、文档标题、导出 PDF / 独立 HTML。存在 `options.json` 的 `locale` 字段，
     由 `resume_preview` 的 `locale` 参数设置。
@@ -135,10 +135,10 @@ npm test             # vitest（CI 用 npm test -- --run）
 npm run test:e2e     # 端到端：MCP 工具链路 + 官网（需先 build）
 npm run dev          # tsc --watch
 npm start            # 运行 build/index.js（MCP stdio 模式）
-node build/index.js --serve   # 独立画廊模式，打开 http://localhost:3737/
+node build/index.js --serve   # 独立简历库模式，打开 http://localhost:3737/
 node .claude/dev/call-tool.mjs            # 直接调 MCP 工具（不经过 Claude）
 node .claude/dev/verify-live-reload.mjs   # 端到端验证实时刷新链路
-node .claude/dev/e2e-mcp.mjs              # 端到端：MCP 工具 + 预览页 + 画廊 + 导出
+node .claude/dev/e2e-mcp.mjs              # 端到端：MCP 工具 + 预览页 + 简历库 + 导出
 node .claude/dev/e2e-web.mjs              # 端到端：官网中英双语渲染与交互
 npx tsc --noEmit     # 类型检查
 npm run format       # prettier --write .

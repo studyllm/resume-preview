@@ -177,7 +177,7 @@ describe("Page Renderer", () => {
       );
 
       expect(html).toContain("Resume Preview");
-      expect(html).toContain("Gallery");
+      expect(html).toContain("Library");
 
       // Cleanup
       await unlink(join(actualPreviewDir, "locale-test.html"));
@@ -189,10 +189,10 @@ describe("Page Renderer", () => {
       await writeFile(join(actualPreviewDir, "i18n-test.html"), templateContent);
 
       const chinese = await renderPage("i18n-test.html", {}, { locale: "zh-CN" });
-      expect(chinese).toContain("<h1>简历画廊</h1>");
+      expect(chinese).toContain("<h1>简历库</h1>");
 
       const english = await renderPage("i18n-test.html", {}, { locale: "en" });
-      expect(english).toContain("<h1>Resume Gallery</h1>");
+      expect(english).toContain("<h1>Resume Library</h1>");
 
       // Cleanup
       await unlink(join(actualPreviewDir, "i18n-test.html"));
@@ -282,7 +282,7 @@ describe("Page Renderer", () => {
       const html = await renderPage("defaults-test.html", { PORT: 3737 });
 
       // The default title comes from the dictionary of the default locale
-      expect(html).toContain("<title>简历画廊 - 简历预览</title>");
+      expect(html).toContain("<title>简历库 - 简历预览</title>");
       expect(html).toContain('<nav class="nav">'); // includeNav defaults to true
       // includeFooter defaults to false, so footer should be empty
 

@@ -31,8 +31,11 @@ body {
   font-family: var(--resume-font);
 }
 
+/* The standalone HTML export: the A4 sheet sits centered on a neutral desk,
+   so the page boundary is visible instead of blending into the white page. */
 body.resume-export {
-  background: #ffffff;
+  background: #e6e6e6;
+  padding: 24px 16px;
 }
 
 /* ===== Preview viewport ===== */
@@ -67,9 +70,12 @@ body.resume-export {
 }
 
 body.resume-export .resume-page {
-  padding: 0;
-  margin: 0;
-  box-shadow: none;
+  box-sizing: border-box;
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 15mm;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
 }
 
 .resume-header {
@@ -197,6 +203,23 @@ body.resume-export .resume-page {
   }
 
   .resume-page {
+    box-shadow: none;
+  }
+
+  /* The standalone export carries its own screen chrome; printing it must
+     fall back to the plain page the PDF export produces — the @page rule
+     already supplies the margins. */
+  body.resume-export {
+    background: #ffffff;
+    padding: 0;
+  }
+
+  body.resume-export .resume-page {
+    box-sizing: content-box;
+    width: 180mm;
+    max-width: none;
+    margin: 0;
+    padding: 0;
     box-shadow: none;
   }
 

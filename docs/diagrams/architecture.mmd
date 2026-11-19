@@ -8,7 +8,7 @@ flowchart TB
   subgraph L0["L0 接入层 · 协议适配"]
     direction LR
     IDX["index.ts<br/>MCP stdio 服务入口<br/>注册工具并分发调用"]
-    SERVE["serve.ts<br/>--serve 独立模式<br/>注册存量简历并打开画廊"]
+    SERVE["serve.ts<br/>--serve 独立模式<br/>注册存量简历并打开简历库"]
     LS["live-server.ts<br/>HTTP + WebSocket 服务<br/>端口探测与实时推送"]
   end
 
@@ -39,7 +39,7 @@ flowchart TB
 
   subgraph L4["L4 资源层 · 静态资源与本地存储"]
     direction LR
-    PREVIEW["src/preview/*<br/>预览页与画廊页的模板、脚本与样式<br/>以及语言字典 i18n/*.json"]
+    PREVIEW["src/preview/*<br/>预览页与简历库页的模板、脚本与样式<br/>以及语言字典 i18n/*.json"]
     RSTORE[("~/.config/resume-preview/resumes<br/>按 slug 存放<br/>resume.json / options.json / resume.html")]
     LOGS[("~/.config/resume-preview/logs<br/>mcp.log 与 web.log")]
   end

@@ -15,7 +15,7 @@ MIT licensed, works with any MCP client.
 - 🔤 **Plain Text, Always** - Content is escaped; HTML tags and scripts in it are never interpreted
 - 🗂️ **Multiple Resumes** - One `resume_id` per resume, each with its own tab and its own slug
 - 💾 **Persistent Working Files** - Resumes are stored under `~/.config/resume-preview/resumes`
-- 🖥️ **Standalone Gallery** - `resume-preview --serve` opens a browser gallery of every stored resume, with search and delete
+- 🖥️ **Standalone Resume Library** - `resume-preview --serve` opens a browser library of every stored resume, with search and delete
 - 🌍 **Two Independent Languages** - The page chrome follows the browser's language; the resume's own language is set per resume and decides the section headings and the exported document
 - 🔎 **Review Tools** - Zoom, pan and export straight from the preview page, with a live connection indicator and a "last updated" stamp
 - 🤖 **Built-in Skill** - The plugin ships a `resume` skill with the content model and wording guidance
@@ -225,7 +225,7 @@ With the `--serve` flag you can start the preview server without an AI agent:
 resume-preview --serve
 ```
 
-It opens the resume gallery in your browser with every resume rendered so far. The gallery shows each resume's last-updated time and file size, lets you **search by id**, and lets you **delete** the ones you no longer need.
+It opens the resume library in your browser with every resume rendered so far. The library shows each resume's last-updated time and file size, lets you **search by id**, and lets you **delete** the ones you no longer need.
 
 ## 🛠️ Development
 
@@ -250,7 +250,7 @@ npm start
 
 **Where are resumes stored?** Under `~/.config/resume-preview/resumes/<slug>/` — the directory name is a slug derived from the `resume_id`, so a Chinese id such as `小王的简历` becomes something like `r-3f9a2b`.
 
-**Which languages are supported?** Two, and they are independent of each other. The **page chrome** — the gallery, the toolbar, the dialogs — follows the request: `?lang=en` wins, then the browser's `Accept-Language`, then `zh-CN`. The **resume itself** — the section headings and the exported document — follows the `locale` you pass to `resume_preview`, which is stored with the resume and defaults to `zh-CN`. The export language never depends on the browser, so the same resume always exports the same way.
+**Which languages are supported?** Two, and they are independent of each other. The **page chrome** — the resume library, the toolbar, the dialogs — follows the request: `?lang=en` wins, then the browser's `Accept-Language`, then `zh-CN`. The **resume itself** — the section headings and the exported document — follows the `locale` you pass to `resume_preview`, which is stored with the resume and defaults to `zh-CN`. The export language never depends on the browser, so the same resume always exports the same way.
 
 **Can the content contain HTML?** No, and deliberately so. Every value is escaped and printed as text, so markup shows up literally instead of being interpreted. Write plain text — this is the largest XSS surface of the product and it stays closed.
 

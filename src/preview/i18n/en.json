@@ -4,7 +4,7 @@
     "htmlLang": "en"
   },
   "gallery": {
-    "title": "Resume Gallery",
+    "title": "Resume Library",
     "subtitle": "Browse and open your resumes",
     "searchPlaceholder": "Search resumes by ID…",
     "loading": "Loading…",
@@ -18,9 +18,9 @@
     "deleteConfirm": "Are you sure you want to delete resume \"{id}\"?",
     "deleteFailed": "Failed to delete resume: {message}",
     "loadFailedTitle": "Failed to load resumes",
-    "navGallery": "Gallery",
+    "navGallery": "Library",
     "footerText": "Resume Preview",
-    "pageTitle": "Resume Gallery - Resume Preview"
+    "pageTitle": "Resume Library - Resume Preview"
   },
   "preview": {
     "statusLive": "Live Reload Active",

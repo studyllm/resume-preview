@@ -31,7 +31,7 @@ A local render loop with four moving parts:
 - **Multiple resumes** — give each resume its own `resume_id` and work on several at once.
 - **Two independent languages** — the page chrome follows the browser's language; the resume's own language is set per resume and decides the section headings and the exported document.
 - **Persistent working files** — resumes are kept under `~/.config/resume-preview/resumes`, so they survive between sessions.
-- **Standalone gallery** — run `resume-preview --serve` to open a browser gallery of every stored resume, no agent required. Search by id, see when each one was last updated, delete the ones you no longer need.
+- **Standalone resume library** — run `resume-preview --serve` to open a browser library of every stored resume, no agent required. Search by id, see when each one was last updated, delete the ones you no longer need.
 - **Review tools** — zoom, pan and export straight from the preview page, with a live connection indicator and a "last updated" stamp.
 - **Built-in resume skill** — the Claude Code plugin ships a skill with the content model and the preview-iterate-export workflow.
 

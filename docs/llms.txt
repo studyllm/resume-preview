@@ -13,7 +13,7 @@ Key facts:
 - Or from npm: `npm install -g @studyllm/resume-preview` then `claude mcp add --scope user resume-preview resume-preview`
 - Works with any MCP client (Cursor, Codex, Windsurf, Cline, Gemini CLI) via the `resume-preview` command
 - Runs locally: renders with puppeteer, serves previews at http://localhost:3737/resume/<slug> (ports 3737–3747), reloads over WebSocket
-- Resumes persist under ~/.config/resume-preview/resumes; `resume-preview --serve` opens a standalone gallery
+- Resumes persist under ~/.config/resume-preview/resumes; `resume-preview --serve` opens a standalone resume library
 - Two independent languages: the page chrome follows `?lang=` > `Accept-Language` > `zh-CN` per request, the resume follows its own stored `locale` — the exported document never depends on the browser
 - Runtime dependencies: @modelcontextprotocol/sdk, puppeteer, ws. Node.js >= 22.13
 
@@ -48,7 +48,7 @@ Key facts:
 - Resumes live under ~/.config/resume-preview/resumes/<slug>/, logs under ~/.config/resume-preview/logs
 - The slug is derived from the `resume_id`: an ASCII skeleton plus a 6-character hash suffix, so preview URLs are not guessable
 - Log level is read from `CLAUDE_MERMAID_LOG_LEVEL` (DEBUG/INFO/WARN/ERROR/OFF, default INFO) — the name is a leftover from the project's former name and is kept unchanged
-- HTTP routes: GET / (gallery), GET /api/resumes, DELETE /api/resumes/:id, GET /resume/:slug (live preview), GET /resume/view/:slug, GET /resume/export/:slug?format=pdf|html, GET /i18n/:locale.json, plus /resume.css, /resume.js, /shared.css, /gallery.css, /gallery.js, /i18n.js, /favicon.svg
+- HTTP routes: GET / (resume library), GET /api/resumes, DELETE /api/resumes/:id, GET /resume/:slug (live preview), GET /resume/view/:slug, GET /resume/export/:slug?format=pdf|html, GET /i18n/:locale.json, plus /resume.css, /resume.js, /shared.css, /gallery.css, /gallery.js, /i18n.js, /favicon.svg
 
 ## Documentation
 
