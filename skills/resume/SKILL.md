@@ -1,6 +1,6 @@
 ---
 name: resume
-description: Write, create, draft, revise, and export resumes (简历) with live preview. Use when the user asks to write/create/draft/make a resume or CV (帮我写一份简历、创建一份简历、生成一份求职简历、做一份后端工程师简历、帮我改简历、导出简历为 PDF), wants one tailored to a job posting (JD), wants resume wording or section order revised, or wants a resume exported as PDF or HTML. Provides the content model, the preview-iterate-export workflow, and the pitfalls of the resume_preview and resume_export tools.
+description: Write, create, revise, and export resumes with live preview. Use when the user asks to write, create, or draft a resume or CV, wants one tailored to a job posting, wants resume wording or section order revised, or wants a resume exported as PDF or HTML. Provides the content model, the preview-iterate-export workflow, and the pitfalls of the resume_preview and resume_export tools.
 allowed-tools: mcp__resume-preview__resume_preview, mcp__resume-preview__resume_export, mcp__plugin_resume-preview_resume-preview__resume_preview, mcp__plugin_resume-preview_resume-preview__resume_export
 ---
 
