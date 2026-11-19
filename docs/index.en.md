@@ -38,9 +38,7 @@ A local render loop with four moving parts:
 ## Installation
 
 > **Release status**: The npm package `@studyllm/resume-preview` is published.
-> Install it globally with `npm install -g @studyllm/resume-preview`; the plugin's `npx`
-> launcher is `npx -y @studyllm/resume-preview`. You can also clone the repository
-> `studyllm/resume-preview`, run `npm install && npm run build`, and wire it up with `.mcp.json`.
+> Pick one of the three routes below — except the plugin route, the other two need the npm package installed first.
 
 ### Claude Code plugin (recommended)
 
@@ -66,7 +64,13 @@ Verify with `claude mcp list` — you should see `resume-preview: resume-preview
 
 ### Other MCP clients
 
-For Cursor, Codex, Windsurf, Cline, Gemini CLI, or any other MCP client, install the package and add this to the client's MCP configuration:
+For Cursor, Codex, Windsurf, Cline, Gemini CLI, or any other MCP client, **install the package globally first** (the client launches the server through the `resume-preview` command on your PATH — without it, the client reports "cannot connect"):
+
+```bash
+npm install -g @studyllm/resume-preview
+```
+
+Then add this to the client's MCP configuration:
 
 ```json
 {

@@ -38,9 +38,7 @@ resume-preview 是一个 MCP server，把简历渲染到你的浏览器里，每
 ## 安装
 
 > **发布状态**：npm 包 `@studyllm/resume-preview` **已发布**。
-> 全局安装：`npm install -g @studyllm/resume-preview`；插件的 `npx` 启动方式为
-> `npx -y @studyllm/resume-preview`。也可克隆源码仓库 `studyllm/resume-preview` 后执行
-> `npm install && npm run build`，再用 `.mcp.json` 接入。
+> 下面三条路挑一条 —— 除了插件那条，另外两条都要先装 npm 包。
 
 ### Claude Code 插件（推荐）
 
@@ -66,7 +64,13 @@ claude mcp add --scope user resume-preview resume-preview
 
 ### 其他 MCP 客户端
 
-Cursor、Codex、Windsurf、Cline、Gemini CLI，或任何其他 MCP 客户端：先安装这个包，再把下面这段加进客户端的 MCP 配置：
+Cursor、Codex、Windsurf、Cline、Gemini CLI，或任何其他 MCP 客户端：**先全局安装**（客户端是靠 PATH 上的 `resume-preview` 命令拉起服务的，没装就会报「连接不上」）：
+
+```bash
+npm install -g @studyllm/resume-preview
+```
+
+再把下面这段加进客户端的 MCP 配置：
 
 ```json
 {

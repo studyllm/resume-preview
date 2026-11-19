@@ -33,13 +33,9 @@ The module and interface inventory lives in [`docs/api-list.md`](docs/api-list.m
 
 ## 🚀 Quick Start
 
-> **Release status**: the npm package `@studyllm/resume-preview` is **published**.
-> Install it globally with `npm install -g @studyllm/resume-preview`; the plugin's `npx`
-> launcher is `npx -y @studyllm/resume-preview`. You can also clone the repository
-> `studyllm/resume-preview`, run `npm install && npm run build`, and wire it up with
-> the `.mcp.json` below.
+The npm package `@studyllm/resume-preview` **is published**. Pick one of the three routes below — **except the plugin route, the other two need the npm package installed first**.
 
-**Plugin install (recommended)**
+### Route 1: Claude Code plugin (recommended)
 
 > **Type in Claude Code** — the two lines below are slash commands, not shell commands.
 
@@ -48,9 +44,81 @@ The module and interface inventory lives in [`docs/api-list.md`](docs/api-list.m
 /plugin install resume-preview@resume-preview
 ```
 
-Then restart Claude Code to activate the plugin.
+Then restart Claude Code to activate the plugin. The MCP server is configured automatically — run `/mcp` in Claude Code and check that `resume-preview` shows up in the server list.
 
-**Install from source**
+(The plugin launches the package through `npx`, so this route needs **no** global install.)
+
+### Route 2: Other MCP clients (Cursor / Codex / Windsurf / Cline / Gemini CLI …)
+
+This server is optimized for Claude Code, but it works with any MCP-compatible client.
+
+**Step 1 · Install it globally (required)**
+
+```bash
+npm install -g @studyllm/resume-preview
+```
+
+> ⚠️ **Do not skip this step.** The client launches the server through the `resume-preview` command on your PATH — without the package installed, the client reports "cannot connect" no matter how the configuration looks.
+
+Check that the command really made it onto your PATH:
+
+```bash
+resume-preview -v      # should print a version like 3.2.1
+```
+
+**Step 2 · Write the MCP configuration**
+
+The configuration is the same for every client — add this to the client's MCP configuration file:
+
+> **Your client's MCP configuration**
+
+```json
+{
+  "mcpServers": {
+    "resume-preview": {
+      "command": "resume-preview"
+    }
+  }
+}
+```
+
+<details>
+<summary><strong>Where each client keeps its configuration</strong></summary>
+
+- **Codex** — `~/.codex/mcp_settings.json`
+- **Cursor** — `.cursor/mcp.json`, or Settings (Cmd/Ctrl + ,) → MCP Servers
+- **VSCode with [Cline extension](https://github.com/cline/cline)** — Settings (Cmd/Ctrl + ,) → search for "Cline MCP" → MCP Settings JSON
+- **Windsurf** — macOS `~/Library/Application Support/Windsurf/mcp.json`; Linux `~/.config/windsurf/mcp.json`; Windows `%APPDATA%\Windsurf\mcp.json`
+- **Gemini CLI** — `~/.gemini/mcp.json`
+
+Every other MCP-compatible client uses the same configuration.
+
+</details>
+
+Three clients can also be configured from the command line:
+
+```bash
+claude mcp add --scope user resume-preview resume-preview
+codex mcp add resume-preview resume-preview
+gemini config mcp add resume-preview --command resume-preview
+```
+
+**Step 3 · Verify**
+
+The client should now show `resume-preview` as connected. To check with Claude Code:
+
+```bash
+claude mcp list
+```
+
+It should print `resume-preview: resume-preview - ✓ Connected`.
+
+**Note:** Some clients may require the full path to the executable:
+
+- Find the path: `which resume-preview` (Unix/macOS) or `where resume-preview` (Windows)
+- Use absolute path in config: `"command": "/path/to/resume-preview"`
+
+### Route 3: Install from source
 
 ```bash
 git clone https://github.com/studyllm/resume-preview.git
@@ -58,31 +126,21 @@ cd resume-preview
 npm install && npm run build && npm install -g .
 ```
 
-After a local checkout, connect it with a `.mcp.json` like this:
+After a local checkout, connect it with a `.mcp.json` like this (an absolute path is recommended):
 
 ```json
 {
   "mcpServers": {
     "resume-preview": {
       "command": "node",
-      "args": ["build/index.js"]
+      "args": ["/path/to/resume-preview/build/index.js"]
     }
   }
 }
 ```
 
-**Verify the installation**
-
-Plugin install: the MCP server is configured automatically — just run `/mcp` in Claude Code and check that `resume-preview` shows up in the server list.
-
-Install from source: register it manually and check:
-
-```bash
-claude mcp add --scope user resume-preview resume-preview
-claude mcp list
-```
-
-You should see `resume-preview: resume-preview - ✓ Connected`
+That last `npm install -g .` also puts the `resume-preview` command on your PATH, so the
+`"command": "resume-preview"` configuration from route 2 works just as well.
 
 ## 💡 Usage
 
@@ -161,51 +219,6 @@ A section that is missing from the content is left out of the page — it is nev
 
 The headings follow the resume's own `locale`, not the browser's: `en` gives the headings above, `zh-CN` gives 自我评价 / 工作经历 / 项目经历 / 教育经历 / 专业技能 / 其他. The exported document always comes out in the language you set, no matter who opens it.
 
-## 🔌 Other MCP Client Configurations
-
-This server is optimized for Claude Code, but it works with any MCP-compatible client.
-
-The configuration is the same for every client — add this to the client's MCP configuration file:
-
-> **Your client's MCP configuration**
-
-```json
-{
-  "mcpServers": {
-    "resume-preview": {
-      "command": "resume-preview"
-    }
-  }
-}
-```
-
-<details>
-<summary><strong>Where each client keeps its configuration</strong></summary>
-
-- **Codex** — `~/.codex/mcp_settings.json`
-- **Cursor** — `.cursor/mcp.json`, or Settings (Cmd/Ctrl + ,) → MCP Servers
-- **VSCode with [Cline extension](https://github.com/cline/cline)** — Settings (Cmd/Ctrl + ,) → search for "Cline MCP" → MCP Settings JSON
-- **Windsurf** — macOS `~/Library/Application Support/Windsurf/mcp.json`; Linux `~/.config/windsurf/mcp.json`; Windows `%APPDATA%\Windsurf\mcp.json`
-- **Gemini CLI** — `~/.gemini/mcp.json`
-
-Every other MCP-compatible client uses the same configuration.
-
-</details>
-
-Two clients can also be configured from the command line:
-
-```bash
-codex mcp add resume-preview resume-preview
-gemini config mcp add resume-preview --command resume-preview
-```
-
-The command `resume-preview` should be available in your PATH after installation.
-
-**Note:** Some clients may require the full path to the executable:
-
-- Find the path: `which resume-preview` (Unix/macOS) or `where resume-preview` (Windows)
-- Use absolute path in config: `"command": "/path/to/resume-preview"`
-
 ## 🎯 Live Reload
 
 1. **First render:** the resume opens in the browser at `http://localhost:3737/resume/<slug>`
@@ -260,13 +273,19 @@ npm start
 
 **The server is not connecting:**
 
+The usual cause is **not installing the package globally** — the client cannot find the `resume-preview` command on your PATH:
+
 ```bash
-# Check if the server is installed
+# Check that the command is installed and runs
 resume-preview -v
 
-# Reinstall if needed
+# Install it if it is missing or does not run
 npm install -g @studyllm/resume-preview
+```
 
+On Windows, also make sure npm's global directory (`%APPDATA%\npm` by default) is on your PATH. Use `where resume-preview` to find the absolute path and put it straight into the client configuration.
+
+```bash
 # Verify the MCP configuration
 claude mcp list
 ```

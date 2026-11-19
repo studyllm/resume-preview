@@ -33,12 +33,9 @@ MIT 许可证，兼容任何 MCP 客户端。
 
 ## 🚀 快速开始
 
-> **发布状态**：npm 包 `@studyllm/resume-preview` **已发布**。
-> 全局安装：`npm install -g @studyllm/resume-preview`；插件的 `npx` 启动方式为
-> `npx -y @studyllm/resume-preview`。也可克隆源码仓库 `studyllm/resume-preview` 后执行
-> `npm install && npm run build`，再按下面的 `.mcp.json` 接入 MCP 客户端。
+npm 包 `@studyllm/resume-preview` **已发布**。下面三条路挑一条 —— **除了插件那条，另外两条都要先装 npm 包**。
 
-**插件安装（推荐）**
+### 方式一：Claude Code 插件（推荐）
 
 > **在 Claude Code 中输入** —— 下面两条是斜杠命令，不是 shell 命令。
 
@@ -47,9 +44,82 @@ MIT 许可证，兼容任何 MCP 客户端。
 /plugin install resume-preview@resume-preview
 ```
 
-然后重启 Claude Code 以激活插件。
+然后重启 Claude Code 以激活插件。MCP 服务会自动配置好：在 Claude Code 里运行 `/mcp`，确认服务列表里出现 `resume-preview` 就行。
 
-**从源码安装**
+（插件是用 `npx` 拉起这个包的，所以这一条路**不需要**你手动全局安装。）
+
+### 方式二：其他 MCP 客户端（Cursor / Codex / Windsurf / Cline / Gemini CLI …）
+
+这个服务是为 Claude Code 优化的，但任何兼容 MCP 的客户端都能用。
+
+**第 1 步 · 全局安装（必做）**
+
+```bash
+npm install -g @studyllm/resume-preview
+```
+
+> ⚠️ **这一步不能跳。** 客户端是靠 PATH 上的 `resume-preview` 命令拉起服务的 —— 没装的话，
+> 客户端连配置都对，也只会报「连接不上」。
+
+装完确认命令确实进了 PATH：
+
+```bash
+resume-preview -v      # 应输出类似 3.2.1 的版本号
+```
+
+**第 2 步 · 写 MCP 配置**
+
+配置内容对所有客户端都一样 —— 把下面这段加进客户端的 MCP 配置文件：
+
+> **客户端的 MCP 配置**
+
+```json
+{
+  "mcpServers": {
+    "resume-preview": {
+      "command": "resume-preview"
+    }
+  }
+}
+```
+
+<details>
+<summary><strong>各客户端的配置文件位置</strong></summary>
+
+- **Codex** — `~/.codex/mcp_settings.json`
+- **Cursor** — `.cursor/mcp.json`，或设置界面（Cmd/Ctrl + ,）→ MCP Servers
+- **VSCode + [Cline 插件](https://github.com/cline/cline)** — 设置（Cmd/Ctrl + ,）→ 搜索 "Cline MCP" → MCP Settings JSON
+- **Windsurf** — macOS `~/Library/Application Support/Windsurf/mcp.json`；Linux `~/.config/windsurf/mcp.json`；Windows `%APPDATA%\Windsurf\mcp.json`
+- **Gemini CLI** — `~/.gemini/mcp.json`
+
+其余兼容 MCP 的客户端也用上面那份标准配置。
+
+</details>
+
+有三个客户端可以直接用命令行配置：
+
+```bash
+claude mcp add --scope user resume-preview resume-preview
+codex mcp add resume-preview resume-preview
+gemini config mcp add resume-preview --command resume-preview
+```
+
+**第 3 步 · 验证**
+
+客户端里应当能看到 `resume-preview` 已连接。用 Claude Code 核对的话：
+
+```bash
+claude mcp list
+```
+
+会显示 `resume-preview: resume-preview - ✓ Connected`。
+
+**注意：** 有些客户端要的是可执行文件的完整路径：
+
+- 查路径：`which resume-preview`（Unix/macOS）或 `where resume-preview`（Windows）
+- 在配置里用绝对路径：`"command": "/path/to/resume-preview"`
+
+### 方式三：从源码安装
 
 ```bash
 git clone https://github.com/studyllm/resume-preview.git
@@ -57,31 +127,21 @@ cd resume-preview
 npm install && npm run build && npm install -g .
 ```
 
-本地检出后，用这样一份 `.mcp.json` 接入 MCP 客户端：
+本地检出后，用这样一份 `.mcp.json` 接入 MCP 客户端（路径建议写绝对路径）：
 
 ```json
 {
   "mcpServers": {
     "resume-preview": {
       "command": "node",
-      "args": ["build/index.js"]
+      "args": ["/path/to/resume-preview/build/index.js"]
     }
   }
 }
 ```
 
-**验证安装**
-
-插件安装：MCP 服务会自动配置好，只需在 Claude Code 中运行 `/mcp`，确认服务列表里出现 `resume-preview`。
-
-从源码安装：需要手动注册并核对：
-
-```bash
-claude mcp add --scope user resume-preview resume-preview
-claude mcp list
-```
-
-你应当看到 `resume-preview: resume-preview - ✓ Connected`
+最后那条 `npm install -g .` 会把 `resume-preview` 命令也装进 PATH，所以方式二里那份
+`"command": "resume-preview"` 的配置同样适用。
 
 ## 💡 使用
 
@@ -160,51 +220,6 @@ claude mcp list
 
 标题跟随简历自身的 `locale`，而不是浏览器的：`zh-CN` 就是上面这些标题，`en` 则是 Summary → Experience → Projects → Education → Skills → Extras。导出的文档始终是你设定的那个语言，与谁打开它无关。
 
-## 🔌 其他 MCP 客户端配置
-
-这个服务是为 Claude Code 优化的，但任何兼容 MCP 的客户端都能用。
-
-配置内容对所有客户端都是一样的 —— 把下面这段加进客户端的 MCP 配置文件：
-
-> **客户端的 MCP 配置**
-
-```json
-{
-  "mcpServers": {
-    "resume-preview": {
-      "command": "resume-preview"
-    }
-  }
-}
-```
-
-<details>
-<summary><strong>各客户端的配置文件位置</strong></summary>
-
-- **Codex** — `~/.codex/mcp_settings.json`
-- **Cursor** — `.cursor/mcp.json`，或设置界面（Cmd/Ctrl + ,）→ MCP Servers
-- **VSCode + [Cline 插件](https://github.com/cline/cline)** — 设置（Cmd/Ctrl + ,）→ 搜索 "Cline MCP" → MCP Settings JSON
-- **Windsurf** — macOS `~/Library/Application Support/Windsurf/mcp.json`；Linux `~/.config/windsurf/mcp.json`；Windows `%APPDATA%\Windsurf\mcp.json`
-- **Gemini CLI** — `~/.gemini/mcp.json`
-
-其余兼容 MCP 的客户端也用上面那份标准配置。
-
-</details>
-
-有两个客户端可以直接用命令行配置：
-
-```bash
-codex mcp add resume-preview resume-preview
-gemini config mcp add resume-preview --command resume-preview
-```
-
-安装之后，`resume-preview` 命令应当已经在你的 PATH 里。
-
-**注意：** 有些客户端要的是可执行文件的完整路径：
-
-- 查路径：`which resume-preview`（Unix/macOS）或 `where resume-preview`（Windows）
-- 在配置里用绝对路径：`"command": "/path/to/resume-preview"`
-
 ## 🎯 实时刷新
 
 1. **首次渲染：** 在浏览器打开 `http://localhost:3737/resume/<slug>`
@@ -259,13 +274,20 @@ npm start
 
 **服务连不上：**
 
+最常见的原因是**没做全局安装** —— 客户端在 PATH 上找不到 `resume-preview` 命令：
+
 ```bash
-# 确认服务已安装
+# 确认命令已安装且能运行
 resume-preview -v
 
-# 需要的话重装
+# 没有或跑不起来，就装上
 npm install -g @studyllm/resume-preview
+```
 
+Windows 上还要确认 npm 的全局目录（默认 `%APPDATA%\npm`）在 PATH 里。用 `where resume-preview`
+查到绝对路径后，直接把它填进客户端配置即可。
+
+```bash
 # 核对 MCP 配置
 claude mcp list
 ```

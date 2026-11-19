@@ -1817,21 +1817,14 @@
           <p style="margin: 0 0 20px; font-size: 14px; color: var(--ink-faint)">
             <span lang="zh-CN"
               ><strong>发布状态</strong>：npm 包 <code>@studyllm/resume-preview</code>
-              <strong>已发布</strong>。全局安装：<code>npm install -g @studyllm/resume-preview</code
-              >；插件的 <code>npx</code> 启动方式为
-              <code>npx -y @studyllm/resume-preview</code>。也可克隆源码仓库
-              <code>studyllm/resume-preview</code> 后执行
-              <code>npm install &amp;&amp; npm run build</code>，再用
-              <code>.mcp.json</code> 接入。</span
+              <strong>已发布</strong>。下面三条路挑一条 —— 除了插件那条，另外两条都要先装 npm
+              包。</span
             >
             <span lang="en"
               ><strong>Release status</strong>: The npm package
-              <code>@studyllm/resume-preview</code> is <strong>published</strong>. Install it
-              globally with <code>npm install -g @studyllm/resume-preview</code>; the plugin's
-              <code>npx</code> launcher is <code>npx -y @studyllm/resume-preview</code>. You can
-              also clone the repository <code>studyllm/resume-preview</code>, run
-              <code>npm install &amp;&amp; npm run build</code>, and wire it up with
-              <code>.mcp.json</code>.</span
+              <code>@studyllm/resume-preview</code> is <strong>published</strong>. Pick one of the
+              three routes below — except the plugin route, the other two need the npm package
+              installed first.</span
             >
           </p>
 
@@ -1952,11 +1945,18 @@
                 <p>
                   <span lang="zh-CN"
                     >Cursor、Codex、Windsurf、Cline、Gemini CLI，或任何其他 MCP
-                    客户端：先安装这个包，再把下面这段加进客户端的 MCP 配置。</span
+                    客户端：<strong>先全局安装</strong>（客户端是靠 PATH 上的
+                    <code>resume-preview</code> 命令拉起服务的，没装就会报「连接不上」）：<code
+                      >npm install -g @studyllm/resume-preview</code
+                    >，再把下面这段加进客户端的 MCP 配置。</span
                   >
                   <span lang="en"
                     >For Cursor, Codex, Windsurf, Cline, Gemini CLI, or any other MCP client,
-                    install the package and add this to the client's MCP configuration.</span
+                    <strong>install the package globally first</strong> (the client launches the
+                    server through the <code>resume-preview</code> command on your PATH — without
+                    it, the client reports "cannot connect"):
+                    <code>npm install -g @studyllm/resume-preview</code>, then add this to the
+                    client's MCP configuration.</span
                   >
                 </p>
                 <div
